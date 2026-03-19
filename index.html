@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Base Camping - Beyond the Empty Nest</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <!-- React & Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Framer Motion -->
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, collection, doc, addDoc, onSnapshot, query, orderBy, limit, Timestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Hardcoded Firebase Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAW4tK4syCdX2Z8oeqPdwGaytVzp01HW2g",
+            authDomain: "gen-lang-client-0193285572.firebaseapp.com",
+            projectId: "gen-lang-client-0193285572",
+            appId: "1:307650621337:web:d15291e700af35a0e26d08",
+            firestoreDatabaseId: "ai-studio-26b79e90-40c3-40f1-bc36-be2388365943"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+        const auth = getAuth(app);
+        const googleProvider = new GoogleAuthProvider();
+
+        // Expose to window for Babel script
+        window.firebase = { db, auth, googleProvider, collection, doc, addDoc, onSnapshot, query, orderBy, limit, Timestamp, signInWithPopup, onAuthStateChanged };
+        window.isFirebaseReady = true;
+    </script>
+
+    <style>
+        @layer base {
+            body { font-family: 'Inter', sans-serif; background-color: #F8F9FA; color: #2D3436; }
+            .font-serif { font-family: 'Playfair Display', serif; }
+        }
+        .bg-basecamp-sky { background-color: #F8F9FA; }
+        .bg-basecamp-stone { background-color: #2D3436; }
+        .text-basecamp-stone { color: #2D3436; }
+        .text-basecamp-sky { color: #F8F9FA; }
+        .text-basecamp-earth { color: #636E72; }
+        .bg-basecamp-accent { background-color: #D4AF37; }
+        .text-basecamp-accent { color: #D4AF37; }
+        
+        /* Custom scrollbar */
+        .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(45, 52, 70, 0.1); border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useCallback, useRef } = React;
+        const { motion, AnimatePresence } = window.Motion;
+
+        // Icon Component
+        const Icon = ({ name, className }) => {
+            const iconRef = useRef(null);
+            useEffect(() => {
+                if (iconRef.current) {
+                    lucide.createIcons({
+                        attrs: { class: className },
+                        nameAttr: 'data-lucide',
+                        icons: { [name]: lucide.icons[name] }
+                    });
+                }
+            }, [name, className]);
+            return <i data-lucide={name} ref={iconRef} className={className}></i>;
+        };
+
+        function App() {
+            const [firebaseReady, setFirebaseReady] = useState(false);
+
+            useEffect(() => {
+                const checkFirebase = setInterval(() => {
+                    if (window.isFirebaseReady) {
+                        setFirebaseReady(true);
+                        clearInterval(checkFirebase);
+                    }
+                }, 100);
+                return () => clearInterval(checkFirebase);
+            }, []);
+
+            if (!firebaseReady) {
+                return (
+                    <div className="h-screen flex items-center justify-center bg-basecamp-sky">
+                        <div className="text-center">
+                            <div className="w-12 h-12 border-4 border-basecamp-accent border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                            <p className="text-sm font-bold uppercase tracking-widest text-basecamp-stone">Loading Base Camp...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            return (
+                <div className="min-h-screen">
+                    <Navbar />
+                    <Hero />
+                    <MetaphorSection />
+                    <QuoteSection />
+                    <BookDetails />
+                    <CommunitySection />
+                    <AuthorSection />
+                    <Footer />
+                </div>
+            );
+        }
+
+        function Navbar() {
+            const [isScrolled, setIsScrolled] = useState(false);
+            useEffect(() => {
+                const handleScroll = () => setIsScrolled(window.scrollY > 50);
+                window.addEventListener("scroll", handleScroll);
+                return () => window.removeEventListener("scroll", handleScroll);
+            }, []);
+
+            return (
+                <nav className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 transition-all duration-300 ${isScrolled ? "backdrop-blur-md bg-white/70 border-b border-basecamp-stone/5 py-4" : "bg-transparent"}`}>
+                    <div className="flex items-center gap-2">
+                        <Icon name="mountain" className="w-6 h-6 text-basecamp-earth" />
+                        <span className="text-sm font-bold tracking-widest uppercase text-basecamp-stone">Base Camping</span>
+                    </div>
+                    <div className="hidden md:flex items-center gap-8 text-[10px] font-bold tracking-widest uppercase text-basecamp-earth">
+                        <a href="#metaphor" className="hover:text-basecamp-accent transition-colors">The Metaphor</a>
+                        <a href="#book" className="hover:text-basecamp-accent transition-colors">The Book</a>
+                        <a href="#community" className="hover:text-basecamp-accent transition-colors">Community</a>
+                        <a href="#author" className="hover:text-basecamp-accent transition-colors">The Author</a>
+                        <a href="#" className="px-6 py-3 bg-basecamp-stone text-basecamp-sky rounded-full hover:bg-basecamp-earth transition-all">Pre-Order</a>
+                    </div>
+                </nav>
+            );
+        }
+
+        function Hero() {
+            return (
+                <section className="relative h-screen flex items-center justify-center overflow-hidden pt-20">
+                    <div className="absolute inset-0 z-0">
+                        <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover opacity-90" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-basecamp-sky/20 via-transparent to-basecamp-sky" />
+                    </div>
+                    <div className="relative z-10 text-center px-4 max-w-5xl">
+                        <span className="inline-block mb-6 px-5 py-1.5 border border-basecamp-stone/20 rounded-full text-[10px] font-bold tracking-[0.3em] uppercase text-basecamp-earth bg-white/40 backdrop-blur-md shadow-sm">Beyond the Empty Nest</span>
+                        <h1 className="text-7xl md:text-9xl font-serif mb-8 leading-[0.85] text-basecamp-stone tracking-tighter">Base <span className="italic font-light">Camping</span></h1>
+                        <p className="text-xl md:text-2xl text-basecamp-earth font-light max-w-3xl mx-auto mb-12 leading-relaxed">The empty nest isn’t an ending—it’s an opening. A sacred opportunity where new dreams are built and a fresh sense of calling takes shape.</p>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                            <button className="px-10 py-5 bg-basecamp-stone text-basecamp-sky rounded-full text-xs font-bold tracking-widest uppercase hover:bg-basecamp-earth transition-all flex items-center gap-2">
+                                Explore the Guide <Icon name="chevron-right" className="w-4 h-4" />
+                            </button>
+                            <button className="px-10 py-5 border border-basecamp-stone/20 text-basecamp-stone rounded-full text-xs font-bold tracking-widest uppercase hover:bg-white/60 transition-all">Pre-Order Now</button>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        function MetaphorSection() {
+            return (
+                <section id="metaphor" className="py-32 px-8 bg-white overflow-hidden">
+                    <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.2fr] gap-20 items-center">
+                        <div className="space-y-10">
+                            <div className="w-20 h-1.5 bg-basecamp-accent rounded-full" />
+                            <h2 className="text-5xl md:text-6xl leading-[1.1] tracking-tight font-serif">You are the <span className="italic font-light">Base Camp</span>. <br />They are the <span className="italic font-light">Climbers</span>.</h2>
+                            <p className="text-basecamp-earth leading-relaxed text-xl font-light">The phrase “empty nest” has become cultural shorthand for a transition many parents quietly dread. But what if the emptiness isn’t an ending at all? What if it’s an opening?</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
+                                <div className="space-y-4 p-6 rounded-2xl bg-basecamp-sky/30 border border-basecamp-stone/5">
+                                    <Icon name="tent" className="w-6 h-6 text-basecamp-accent" />
+                                    <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-basecamp-stone">Reliability</h4>
+                                    <p className="text-sm text-basecamp-earth/80 leading-relaxed">A safe haven when the weather turns harsh and the path becomes uncertain.</p>
+                                </div>
+                                <div className="space-y-4 p-6 rounded-2xl bg-basecamp-sky/30 border border-basecamp-stone/5">
+                                    <Icon name="compass" className="w-6 h-6 text-basecamp-accent" />
+                                    <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-basecamp-stone">Wisdom</h4>
+                                    <p className="text-sm text-basecamp-earth/80 leading-relaxed">Providing the long-view perspective that only comes from having walked the valley floor.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="relative">
+                            <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl">
+                                <img src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover" />
+                            </div>
+                            <div className="absolute -bottom-10 -left-10 md:-left-20 right-10 md:right-auto md:w-[400px] p-10 bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20">
+                                <p className="text-xl italic font-serif text-basecamp-stone leading-relaxed">"I lift up my eyes to the mountains—where does my help come from? My help comes from the Lord, the Maker of heaven and earth."</p>
+                                <div className="mt-6 flex items-center gap-4">
+                                    <div className="w-8 h-[1px] bg-basecamp-accent" />
+                                    <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-basecamp-earth">— Psalm 121:1-2</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        function QuoteSection() {
+            return (
+                <section className="py-32 bg-basecamp-stone text-basecamp-sky text-center">
+                    <div className="max-w-4xl mx-auto px-8 space-y-12">
+                        <h2 className="text-4xl md:text-6xl font-serif italic leading-tight">"The empty nest isn't a void to be filled, but a base camp to be built."</h2>
+                        <div className="w-16 h-1 bg-basecamp-accent mx-auto" />
+                        <p className="text-basecamp-sky/60 text-sm uppercase tracking-[0.4em] font-bold">The Core Philosophy</p>
+                    </div>
+                </section>
+            );
+        }
+
+        function BookDetails() {
+            const chapters = [
+                { title: "The First Ascent", desc: "Understanding the psychological and spiritual transition from parenting children to parenting adults.", icon: "mountain" },
+                { title: "Packing Light", desc: "Discerning what your adult children truly need from you—and what they must carry themselves.", icon: "map" },
+                { title: "The Valley of Purpose", desc: "Finding your own identity and calling beyond the 'Empty Nest' label in this new season.", icon: "compass" },
+                { title: "Grounded in Truth", desc: "Biblical principles for navigating complex family dynamics with grace and wisdom.", icon: "book-open" },
+            ];
+            return (
+                <section id="book" className="py-32 px-8 bg-basecamp-sky">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
+                            <div className="max-w-2xl">
+                                <span className="text-basecamp-accent font-bold text-[10px] tracking-[0.3em] uppercase mb-4 block">The Guidebook</span>
+                                <h2 className="text-5xl md:text-7xl font-serif leading-none tracking-tighter">Inside the <span className="italic">Pages</span></h2>
+                            </div>
+                        </div>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {chapters.map((chapter, i) => (
+                                <div key={i} className="p-10 bg-white rounded-[2rem] border border-basecamp-stone/5 hover:shadow-xl transition-all group">
+                                    <div className="w-12 h-12 rounded-2xl bg-basecamp-stone text-basecamp-sky flex items-center justify-center mb-8 group-hover:bg-basecamp-accent group-hover:text-basecamp-stone transition-colors">
+                                        <Icon name={chapter.icon} className="w-5 h-5" />
+                                    </div>
+                                    <h3 className="text-2xl mb-4 font-serif">{chapter.title}</h3>
+                                    <p className="text-sm text-basecamp-earth leading-relaxed font-light">{chapter.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        function CommunitySection() {
+            const { db, auth, googleProvider, collection, addDoc, onSnapshot, query, orderBy, limit, Timestamp, signInWithPopup, onAuthStateChanged } = window.firebase;
+            const [user, setUser] = useState(null);
+            const [threads, setThreads] = useState([]);
+            const [selectedThread, setSelectedThread] = useState(null);
+            const [isNewThreadModalOpen, setIsNewThreadModalOpen] = useState(false);
+            const [newThreadTitle, setNewThreadTitle] = useState("");
+            const [newThreadContent, setNewThreadContent] = useState("");
+            const [loginError, setLoginError] = useState(null);
+            const [createThreadError, setCreateThreadError] = useState(null);
+
+            useEffect(() => {
+                const unsubscribe = onAuthStateChanged(auth, (u) => setUser(u));
+                return () => unsubscribe();
+            }, []);
+
+            useEffect(() => {
+                const q = query(collection(db, "threads"), orderBy("createdAt", "desc"), limit(50));
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    setThreads(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                });
+                return () => unsubscribe();
+            }, []);
+
+            const handleLogin = async () => {
+                setLoginError(null);
+                try {
+                    await signInWithPopup(auth, googleProvider);
+                } catch (error) {
+                    if (error.code === 'auth/unauthorized-domain') {
+                        setLoginError("This domain is not authorized in Firebase. Please add " + window.location.hostname + " to your Firebase Authorized Domains.");
+                    } else {
+                        setLoginError(error.message);
+                    }
+                }
+            };
+
+            const handleCreateThread = async (e) => {
+                e.preventDefault();
+                if (!user || !newThreadTitle || !newThreadContent) return;
+                setCreateThreadError(null);
+                try {
+                    await addDoc(collection(db, "threads"), {
+                        title: newThreadTitle,
+                        content: newThreadContent,
+                        authorId: user.uid,
+                        authorName: user.displayName || "Anonymous",
+                        authorPhoto: user.photoURL || "",
+                        createdAt: Timestamp.now()
+                    });
+                    setNewThreadTitle("");
+                    setNewThreadContent("");
+                    setIsNewThreadModalOpen(false);
+                } catch (error) {
+                    setCreateThreadError(error.message);
+                }
+            };
+
+            return (
+                <section id="community" className="py-32 px-8 bg-white">
+                    <div className="max-w-6xl mx-auto">
+                        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
+                            <div className="max-w-2xl">
+                                <span className="text-basecamp-accent font-bold text-[10px] tracking-[0.3em] uppercase mb-4 block">The Base Camp Forum</span>
+                                <h2 className="text-5xl md:text-7xl font-serif leading-none tracking-tighter">Community <span className="italic font-light text-basecamp-earth/40">Threads</span></h2>
+                            </div>
+                            <div className="flex flex-col items-end gap-4">
+                                {!user ? (
+                                    <div className="flex flex-col items-end gap-2">
+                                        <button onClick={handleLogin} className="flex items-center gap-2 px-6 py-3 bg-basecamp-stone text-basecamp-sky rounded-full text-xs font-bold uppercase tracking-widest hover:bg-basecamp-earth transition-all">
+                                            <Icon name="log-in" className="w-4 h-4" /> Join the Conversation
+                                        </button>
+                                        {loginError && <p className="text-[10px] text-red-500 font-bold max-w-[200px] text-right">{loginError}</p>}
+                                    </div>
+                                ) : (
+                                    <button onClick={() => setIsNewThreadModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-basecamp-accent text-basecamp-stone rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-all">
+                                        <Icon name="plus" className="w-4 h-4" /> Start a Thread
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        <div className="grid lg:grid-cols-[1fr_1.5fr] gap-12">
+                            <div className="space-y-4 max-h-[600px] overflow-y-auto pr-4 scrollbar-thin">
+                                {threads.map((thread) => (
+                                    <div key={thread.id} onClick={() => setSelectedThread(thread)} className={`p-6 rounded-2xl border transition-all cursor-pointer group ${selectedThread?.id === thread.id ? "bg-basecamp-stone text-basecamp-sky border-basecamp-stone shadow-xl" : "bg-basecamp-sky/30 border-basecamp-stone/5 hover:bg-white hover:shadow-lg"}`}>
+                                        <div className="flex items-center gap-3 mb-4">
+                                            <div className="w-8 h-8 rounded-full overflow-hidden bg-basecamp-earth/20">
+                                                {thread.authorPhoto ? <img src={thread.authorPhoto} className="w-full h-full object-cover" /> : <Icon name="user" className="w-4 h-4 m-2" />}
+                                            </div>
+                                            <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">{thread.authorName}</span>
+                                        </div>
+                                        <h3 className="text-xl font-serif mb-2">{thread.title}</h3>
+                                        <p className="text-sm line-clamp-2 font-light opacity-70">{thread.content}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="bg-basecamp-sky/20 rounded-[2.5rem] p-8 md:p-12 border border-basecamp-stone/5 min-h-[600px] flex flex-col">
+                                {selectedThread ? (
+                                    <div className="flex flex-col h-full">
+                                        <div className="mb-10">
+                                            <div className="flex items-center gap-4 mb-6">
+                                                <div className="w-12 h-12 rounded-2xl overflow-hidden bg-basecamp-earth">
+                                                    {selectedThread.authorPhoto ? <img src={selectedThread.authorPhoto} className="w-full h-full object-cover" /> : <Icon name="user" className="w-6 h-6 m-3 text-basecamp-sky" />}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-sm text-basecamp-stone">{selectedThread.authorName}</h4>
+                                                    <p className="text-[10px] uppercase tracking-widest text-basecamp-earth/60">{selectedThread.createdAt?.toDate().toLocaleDateString()}</p>
+                                                </div>
+                                            </div>
+                                            <h2 className="text-3xl md:text-4xl font-serif mb-6 leading-tight">{selectedThread.title}</h2>
+                                            <p className="text-basecamp-earth text-lg leading-relaxed font-light whitespace-pre-wrap">{selectedThread.content}</p>
+                                        </div>
+                                        <div className="flex-grow border-t border-basecamp-stone/10 pt-10">
+                                            <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-basecamp-stone mb-8">Responses</h4>
+                                            <CommentsList threadId={selectedThread.id} user={user} />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="flex flex-col items-center justify-center flex-grow text-center space-y-6">
+                                        <Icon name="compass" className="w-10 h-10 text-basecamp-stone/20" />
+                                        <h3 className="text-xl font-serif">Select a thread</h3>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+
+                    {isNewThreadModalOpen && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <div className="absolute inset-0 bg-basecamp-stone/60 backdrop-blur-md" onClick={() => setIsNewThreadModalOpen(false)} />
+                            <div className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden p-8 md:p-12">
+                                <div className="flex items-center justify-between mb-10">
+                                    <h2 className="text-3xl font-serif">Start a New <span className="italic">Reflection</span></h2>
+                                    <button onClick={() => setIsNewThreadModalOpen(false)}><Icon name="x" className="w-6 h-6" /></button>
+                                </div>
+                                <form onSubmit={handleCreateThread} className="space-y-6">
+                                    {createThreadError && (
+                                        <div className="p-4 bg-red-50 border border-red-100 rounded-2xl">
+                                            <p className="text-xs text-red-600 font-medium">{createThreadError}</p>
+                                        </div>
+                                    )}
+                                    <div>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-basecamp-earth/60 mb-2 block">Thread Title</label>
+                                        <input required value={newThreadTitle} onChange={(e) => setNewThreadTitle(e.target.value)} className="w-full bg-basecamp-sky/30 border border-basecamp-stone/5 rounded-2xl px-6 py-4" />
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] font-bold uppercase tracking-widest text-basecamp-earth/60 mb-2 block">Your Thoughts</label>
+                                        <textarea required value={newThreadContent} onChange={(e) => setNewThreadContent(e.target.value)} rows={6} className="w-full bg-basecamp-sky/30 border border-basecamp-stone/5 rounded-2xl px-6 py-4 resize-none" />
+                                    </div>
+                                    <button type="submit" className="w-full py-5 bg-basecamp-stone text-basecamp-sky rounded-full text-xs font-bold uppercase tracking-widest hover:bg-basecamp-earth transition-all">Post to Base Camp</button>
+                                </form>
+                            </div>
+                        </div>
+                    )}
+                </section>
+            );
+        }
+
+        function CommentsList({ threadId, user }) {
+            const { db, collection, addDoc, onSnapshot, query, orderBy, Timestamp } = window.firebase;
+            const [comments, setComments] = useState([]);
+            const [newComment, setNewComment] = useState("");
+
+            useEffect(() => {
+                const q = query(collection(db, "threads", threadId, "comments"), orderBy("createdAt", "asc"));
+                const unsubscribe = onSnapshot(q, (snapshot) => {
+                    setComments(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+                });
+                return () => unsubscribe();
+            }, [threadId]);
+
+            const handleAddComment = async (e) => {
+                e.preventDefault();
+                if (!user || !newComment) return;
+                try {
+                    await addDoc(collection(db, "threads", threadId, "comments"), {
+                        content: newComment,
+                        authorId: user.uid,
+                        authorName: user.displayName || "Anonymous",
+                        authorPhoto: user.photoURL || "",
+                        createdAt: Timestamp.now()
+                    });
+                    setNewComment("");
+                } catch (error) {
+                    alert("Error adding comment: " + error.message);
+                }
+            };
+
+            return (
+                <div className="space-y-8">
+                    <div className="space-y-6">
+                        {comments.map((comment) => (
+                            <div key={comment.id} className="flex gap-4">
+                                <div className="w-8 h-8 rounded-full overflow-hidden bg-basecamp-earth/10">
+                                    {comment.authorPhoto ? <img src={comment.authorPhoto} className="w-full h-full object-cover" /> : <Icon name="user" className="w-4 h-4 m-2" />}
+                                </div>
+                                <div className="flex-grow">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="text-xs font-bold text-basecamp-stone">{comment.authorName}</span>
+                                        <span className="text-[10px] text-basecamp-earth/40 uppercase tracking-widest">{comment.createdAt?.toDate().toLocaleDateString()}</span>
+                                    </div>
+                                    <p className="text-sm text-basecamp-earth leading-relaxed font-light">{comment.content}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                    {user ? (
+                        <form onSubmit={handleAddComment} className="relative mt-10">
+                            <input value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Add a response..." className="w-full bg-white border border-basecamp-stone/10 rounded-full px-8 py-4 text-sm pr-16" />
+                            <button type="submit" className="absolute right-2 top-2 bottom-2 aspect-square bg-basecamp-stone text-basecamp-sky rounded-full flex items-center justify-center"><Icon name="send" className="w-4 h-4" /></button>
+                        </form>
+                    ) : (
+                        <p className="text-xs text-basecamp-earth/60 font-light italic text-center">Please sign in to join the conversation.</p>
+                    )}
+                </div>
+            );
+        }
+
+        function AuthorSection() {
+            return (
+                <section id="author" className="py-32 px-8 bg-white">
+                    <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-20">
+                        <div className="w-64 h-64 md:w-80 md:h-80 rounded-[3rem] overflow-hidden bg-basecamp-sky shadow-2xl">
+                            <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=1000" className="w-full h-full object-cover" />
+                        </div>
+                        <div className="space-y-8">
+                            <span className="text-basecamp-accent font-bold text-[10px] tracking-[0.3em] uppercase">The Author</span>
+                            <h2 className="text-5xl font-serif">Justin Schmitt</h2>
+                            <p className="text-basecamp-earth text-lg font-light leading-relaxed">Justin is a father, writer, and guide who has spent years helping parents navigate the complexities of family transitions with faith and intentionality.</p>
+                        </div>
+                    </div>
+                </section>
+            );
+        }
+
+        function Footer() {
+            return (
+                <footer className="py-20 px-8 bg-basecamp-stone text-basecamp-sky/40 text-center border-t border-white/5">
+                    <div className="flex items-center justify-center gap-2 mb-8">
+                        <Icon name="mountain" className="w-6 h-6" />
+                        <span className="text-sm font-bold tracking-widest uppercase text-basecamp-sky">Base Camping</span>
+                    </div>
+                    <p className="text-[10px] uppercase tracking-[0.2em]">&copy; 2026 Base Camping. All rights reserved.</p>
+                </footer>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
