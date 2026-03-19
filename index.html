@@ -38,45 +38,29 @@
       .mountain-gradient {
         background: linear-gradient(to bottom, rgba(232, 237, 243, 0) 0%, rgba(232, 237, 243, 1) 100%);
       }
-      
-      /* Custom scrollbar */
-      .scrollbar-thin::-webkit-scrollbar {
-        width: 6px;
-      }
-      .scrollbar-thin::-webkit-scrollbar-track {
-        background: transparent;
-      }
-      .scrollbar-thin::-webkit-scrollbar-thumb {
-        background: rgba(45, 45, 42, 0.1);
-        border-radius: 10px;
-      }
-      .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-        background: rgba(45, 45, 42, 0.2);
-      }
-      
-      /* Perspective for book hover */
-      .perspective-1000 {
-        perspective: 1000px;
-      }
+      .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(45, 45, 42, 0.1); border-radius: 10px; }
+      .perspective-1000 { perspective: 1000px; }
     </style>
 
     <!-- React and Babel Standalone -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Import Map for ESM Dependencies -->
+    <!-- Robust Import Map to prevent "Multiple Reacts" error -->
     <script type="importmap">
     {
       "imports": {
-        "react": "https://esm.sh/react@19?dev",
-        "react-dom": "https://esm.sh/react-dom@19?dev",
-        "react-dom/client": "https://esm.sh/react-dom@19/client?dev",
-        "motion/react": "https://esm.sh/motion/react",
-        "lucide-react": "https://esm.sh/lucide-react",
-        "clsx": "https://esm.sh/clsx",
-        "tailwind-merge": "https://esm.sh/tailwind-merge",
-        "firebase/app": "https://esm.sh/firebase/app",
-        "firebase/auth": "https://esm.sh/firebase/auth",
-        "firebase/firestore": "https://esm.sh/firebase/firestore"
+        "react": "https://esm.sh/react@19.0.0",
+        "react-dom": "https://esm.sh/react-dom@19.0.0",
+        "react-dom/client": "https://esm.sh/react-dom@19.0.0/client",
+        "motion/react": "https://esm.sh/motion/react@12.0.0?deps=react@19.0.0",
+        "lucide-react": "https://esm.sh/lucide-react@0.475.0?deps=react@19.0.0",
+        "clsx": "https://esm.sh/clsx@2.1.1",
+        "tailwind-merge": "https://esm.sh/tailwind-merge@2.5.2",
+        "firebase/app": "https://esm.sh/firebase@11.3.1/app",
+        "firebase/auth": "https://esm.sh/firebase@11.3.1/auth",
+        "firebase/firestore": "https://esm.sh/firebase@11.3.1/firestore"
       }
     }
     </script>
@@ -85,20 +69,18 @@
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
-      import {StrictMode} from 'react';
-      import {createRoot} from 'react-dom/client';
+      import React, { StrictMode, useCallback, useState, useEffect } from 'react';
+      import { createRoot } from 'react-dom/client';
       import { motion, AnimatePresence } from "motion/react";
       import { Mountain, Tent, Map as MapIcon, Compass, BookOpen, User, ChevronRight, ArrowRight, MessageSquare, Send, LogIn, Plus, X } from "lucide-react";
       import { clsx } from "clsx";
       import { twMerge } from "tailwind-merge";
-      import React, { useCallback, useState, useEffect } from "react";
 
       // Firebase imports
       import { initializeApp } from 'firebase/app';
       import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged } from 'firebase/auth';
       import { getFirestore, collection, doc, getDoc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, limit, Timestamp, getDocFromServer } from 'firebase/firestore';
 
-      // Inlined Firebase Configuration
       const firebaseConfig = {
         projectId: "gen-lang-client-0193285572",
         appId: "1:307650621337:web:d15291e700af35a0e26d08",
@@ -110,38 +92,17 @@
         measurementId: ""
       };
 
-      // Initialize Firebase SDK
       const app = initializeApp(firebaseConfig);
       const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
       const auth = getAuth(app);
       const googleProvider = new GoogleAuthProvider();
 
-      // Operation types for error handling
-      const OperationType = {
-        CREATE: 'create',
-        UPDATE: 'update',
-        DELETE: 'delete',
-        LIST: 'list',
-        GET: 'get',
-        WRITE: 'write',
-      };
+      const OperationType = { CREATE: 'create', UPDATE: 'update', DELETE: 'delete', LIST: 'list', GET: 'get', WRITE: 'write' };
 
       function handleFirestoreError(error, operationType, path) {
         const errInfo = {
           error: error instanceof Error ? error.message : String(error),
-          authInfo: {
-            userId: auth.currentUser?.uid,
-            email: auth.currentUser?.email,
-            emailVerified: auth.currentUser?.emailVerified,
-            isAnonymous: auth.currentUser?.isAnonymous,
-            tenantId: auth.currentUser?.tenantId,
-            providerInfo: auth.currentUser?.providerData.map(provider => ({
-              providerId: provider.providerId,
-              displayName: provider.displayName,
-              email: provider.email,
-              photoUrl: provider.photoURL
-            })) || []
-          },
+          authInfo: { userId: auth.currentUser?.uid, email: auth.currentUser?.email },
           operationType,
           path
         }
@@ -149,73 +110,22 @@
         throw new Error(JSON.stringify(errInfo));
       }
 
-      // Test connection to Firestore
-      async function testConnection() {
-        try {
-          await getDocFromServer(doc(db, 'test', 'connection'));
-        } catch (error) {
-          if(error instanceof Error && error.message.includes('the client is offline')) {
-            console.error("Please check your Firebase configuration. ");
-          }
-        }
-      }
-      testConnection();
+      function cn(...inputs) { return twMerge(clsx(inputs)); }
 
-      function cn(...inputs) {
-        return twMerge(clsx(inputs));
-      }
-
-      // Error Boundary Component
       class ErrorBoundary extends React.Component {
-        constructor(props) {
-          super(props);
-          this.state = { hasError: false, errorInfo: null };
-        }
-
-        static getDerivedStateFromError(error) {
-          return { hasError: true, errorInfo: error.message };
-        }
-
+        constructor(props) { super(props); this.state = { hasError: false, errorInfo: null }; }
+        static getDerivedStateFromError(error) { return { hasError: true, errorInfo: error.message }; }
         render() {
           if (this.state.hasError) {
-            let displayError = this.state.errorInfo;
-            try {
-              const parsed = JSON.parse(this.state.errorInfo || "");
-              if (parsed.error) {
-                displayError = `${parsed.operationType.toUpperCase()} error at "${parsed.path}": ${parsed.error}`;
-              }
-            } catch (e) {}
-
             return (
               <div className="min-h-screen flex items-center justify-center bg-[#E8EDF3] p-8 font-sans">
                 <div className="max-w-2xl w-full p-12 bg-white rounded-[3rem] shadow-2xl border border-black/5 text-center">
-                  <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-8">
-                    <X className="w-10 h-10 text-red-500" />
-                  </div>
+                  <X className="w-10 h-10 text-red-500 mx-auto mb-8" />
                   <h2 className="text-3xl font-serif mb-4">Something went wrong</h2>
-                  <p className="text-[#4C4B40]/60 font-light mb-8 italic">
-                    The application encountered an unexpected error. This is often due to Firebase configuration or permissions.
-                  </p>
-                  <div className="bg-red-50 p-6 rounded-2xl text-left mb-10 overflow-auto max-h-60">
-                    <p className="text-xs font-bold uppercase tracking-widest text-red-800 mb-2">Error Details</p>
-                    <pre className="text-xs text-red-700 font-mono whitespace-pre-wrap break-all">
-                      {displayError}
-                    </pre>
-                  </div>
-                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                    <button 
-                      onClick={() => this.setState({ hasError: false, errorInfo: null })}
-                      className="px-10 py-4 bg-[#2D2D2A] text-[#E8EDF3] rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#4C4B40] transition-all shadow-xl shadow-black/20"
-                    >
-                      Try Again
-                    </button>
-                    <button 
-                      onClick={() => window.location.reload()}
-                      className="px-10 py-4 border border-black/20 text-[#2D2D2A] rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#E8EDF3] transition-all"
-                    >
-                      Reload Page
-                    </button>
-                  </div>
+                  <pre className="text-xs text-red-700 font-mono bg-red-50 p-6 rounded-2xl text-left mb-10 overflow-auto max-h-60 whitespace-pre-wrap">
+                    {this.state.errorInfo}
+                  </pre>
+                  <button onClick={() => window.location.reload()} className="px-10 py-4 bg-[#2D2D2A] text-[#E8EDF3] rounded-full text-xs font-bold uppercase tracking-widest">Reload Page</button>
                 </div>
               </div>
             );
@@ -249,74 +159,36 @@
         const [newThreadTitle, setNewThreadTitle] = useState("");
         const [newThreadContent, setNewThreadContent] = useState("");
         const [isAuthReady, setIsAuthReady] = useState(false);
-        const [loginError, setLoginError] = useState(null);
 
         useEffect(() => {
-          const unsubscribe = onAuthStateChanged(auth, (u) => {
-            setUser(u);
-            setIsAuthReady(true);
-          });
+          const unsubscribe = onAuthStateChanged(auth, (u) => { setUser(u); setIsAuthReady(true); });
           return () => unsubscribe();
         }, []);
 
         useEffect(() => {
           if (!isAuthReady) return;
-          
           const q = query(collection(db, "threads"), orderBy("createdAt", "desc"), limit(50));
           const unsubscribe = onSnapshot(q, (snapshot) => {
-            const threadData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setThreads(threadData);
-          }, (error) => {
-            handleFirestoreError(error, OperationType.GET, "threads");
-          });
-
+            setThreads(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+          }, (error) => handleFirestoreError(error, OperationType.GET, "threads"));
           return () => unsubscribe();
         }, [isAuthReady]);
 
         const handleLogin = async () => {
-          setLoginError(null);
-          try {
-            await signInWithPopup(auth, googleProvider);
-          } catch (error) {
-            console.error("Login failed", error);
-            const errorCode = error.code;
-            const errorMessage = error.message;
-            
-            if (errorCode === 'auth/unauthorized-domain') {
-              setLoginError(`Domain "${window.location.hostname}" is not authorized. Add it to Firebase Console > Authentication > Settings > Authorized domains.`);
-            } else if (errorCode === 'auth/popup-closed-by-user') {
-              setLoginError("Login popup was closed. Please try again.");
-            } else if (errorCode === 'auth/cancelled-popup-request') {
-              setLoginError("Multiple login popups opened. Please try again.");
-            } else {
-              setLoginError(`Login failed (${errorCode}): ${errorMessage}`);
-            }
-          }
+          try { await signInWithPopup(auth, googleProvider); } catch (error) { alert(error.message); }
         };
-
-        const [createThreadError, setCreateThreadError] = useState(null);
 
         const handleCreateThread = async (e) => {
           e.preventDefault();
           if (!user || !newThreadTitle || !newThreadContent) return;
-          setCreateThreadError(null);
-
           try {
             await addDoc(collection(db, "threads"), {
-              title: newThreadTitle,
-              content: newThreadContent,
-              authorId: user.uid,
-              authorName: user.displayName || "Anonymous",
-              authorPhoto: user.photoURL || "",
+              title: newThreadTitle, content: newThreadContent, authorId: user.uid,
+              authorName: user.displayName || "Anonymous", authorPhoto: user.photoURL || "",
               createdAt: Timestamp.now()
             });
-            setNewThreadTitle("");
-            setNewThreadContent("");
-            setIsNewThreadModalOpen(false);
-          } catch (error) {
-            console.error("Create thread failed", error);
-            setCreateThreadError(`Failed to create thread: ${error.message || 'Please check your connection and try again.'}`);
-          }
+            setNewThreadTitle(""); setNewThreadContent(""); setIsNewThreadModalOpen(false);
+          } catch (error) { alert(error.message); }
         };
 
         return (
@@ -329,25 +201,12 @@
                 </div>
                 <div className="flex flex-col items-end gap-4">
                   {!user ? (
-                    <div className="flex flex-col items-end gap-2">
-                      <button 
-                        onClick={handleLogin}
-                        className="flex items-center gap-2 px-6 py-3 bg-[#2D2D2A] text-[#E8EDF3] rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#4C4B40] transition-all"
-                      >
-                        <LogIn className="w-4 h-4" />
-                        Join the Conversation
-                      </button>
-                      {loginError && (
-                        <p className="text-[10px] text-red-500 font-bold uppercase tracking-widest">{loginError}</p>
-                      )}
-                    </div>
+                    <button onClick={handleLogin} className="flex items-center gap-2 px-6 py-3 bg-[#2D2D2A] text-[#E8EDF3] rounded-full text-xs font-bold uppercase tracking-widest">
+                      <LogIn className="w-4 h-4" /> Join the Conversation
+                    </button>
                   ) : (
-                    <button 
-                      onClick={() => setIsNewThreadModalOpen(true)}
-                      className="flex items-center gap-2 px-6 py-3 bg-[#D4A373] text-[#2D2D2A] rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-all shadow-lg shadow-[#D4A373]/20"
-                    >
-                      <Plus className="w-4 h-4" />
-                      Start a Thread
+                    <button onClick={() => setIsNewThreadModalOpen(true)} className="flex items-center gap-2 px-6 py-3 bg-[#D4A373] text-[#2D2D2A] rounded-full text-xs font-bold uppercase tracking-widest">
+                      <Plus className="w-4 h-4" /> Start a Thread
                     </button>
                   )}
                 </div>
@@ -358,37 +217,19 @@
                   {threads.length === 0 ? (
                     <div className="p-12 text-center border-2 border-dashed border-black/10 rounded-[2rem]">
                       <MessageSquare className="w-12 h-12 text-black/20 mx-auto mb-4" />
-                      <p className="text-[#4C4B40]/60 font-light italic">No threads yet. Be the first to share your thoughts.</p>
+                      <p className="text-[#4C4B40]/60 font-light italic">No threads yet.</p>
                     </div>
                   ) : (
                     threads.map((thread) => (
-                      <motion.div
-                        key={thread.id}
-                        layoutId={thread.id}
-                        onClick={() => setSelectedThread(thread)}
-                        className={cn(
-                          "p-6 rounded-2xl border transition-all cursor-pointer group",
-                          selectedThread?.id === thread.id 
-                            ? "bg-[#2D2D2A] text-[#E8EDF3] border-[#2D2D2A] shadow-xl" 
-                            : "bg-[#E8EDF3]/30 border-black/5 hover:bg-white hover:shadow-lg"
-                        )}
-                      >
+                      <motion.div key={thread.id} onClick={() => setSelectedThread(thread)} className={cn("p-6 rounded-2xl border transition-all cursor-pointer group", selectedThread?.id === thread.id ? "bg-[#2D2D2A] text-[#E8EDF3]" : "bg-[#E8EDF3]/30 border-black/5 hover:bg-white")}>
                         <div className="flex items-center gap-3 mb-4">
                           <div className="w-8 h-8 rounded-full overflow-hidden bg-[#4C4B40]/20 flex-shrink-0">
-                            {thread.authorPhoto ? (
-                              <img src={thread.authorPhoto} alt={thread.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                            ) : (
-                              <User className="w-4 h-4 m-2" />
-                            )}
+                            {thread.authorPhoto ? <img src={thread.authorPhoto} className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : <User className="w-4 h-4 m-2" />}
                           </div>
-                          <span className={cn("text-[10px] font-bold uppercase tracking-widest", selectedThread?.id === thread.id ? "text-[#E8EDF3]/60" : "text-[#4C4B40]/60")}>
-                            {thread.authorName}
-                          </span>
+                          <span className="text-[10px] font-bold uppercase tracking-widest">{thread.authorName}</span>
                         </div>
-                        <h3 className="text-xl font-serif mb-2 group-hover:text-[#D4A373] transition-colors">{thread.title}</h3>
-                        <p className={cn("text-sm line-clamp-2 font-light", selectedThread?.id === thread.id ? "text-[#E8EDF3]/70" : "text-[#4C4B40]/70")}>
-                          {thread.content}
-                        </p>
+                        <h3 className="text-xl font-serif mb-2">{thread.title}</h3>
+                        <p className="text-sm line-clamp-2 font-light">{thread.content}</p>
                       </motion.div>
                     ))
                   )}
@@ -397,35 +238,20 @@
                 <div className="bg-[#E8EDF3]/20 rounded-[2.5rem] p-8 md:p-12 border border-black/5 min-h-[600px] flex flex-col">
                   <AnimatePresence mode="wait">
                     {selectedThread ? (
-                      <motion.div 
-                        key={selectedThread.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        className="flex flex-col h-full"
-                      >
+                      <motion.div key={selectedThread.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="flex flex-col h-full">
                         <div className="mb-10">
                           <div className="flex items-center gap-4 mb-6">
                             <div className="w-12 h-12 rounded-2xl overflow-hidden bg-[#4C4B40] shadow-lg">
-                              {selectedThread.authorPhoto ? (
-                                <img src={selectedThread.authorPhoto} alt={selectedThread.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                              ) : (
-                                <User className="w-6 h-6 m-3 text-[#E8EDF3]" />
-                              )}
+                              {selectedThread.authorPhoto ? <img src={selectedThread.authorPhoto} className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : <User className="w-6 h-6 m-3 text-[#E8EDF3]" />}
                             </div>
                             <div>
                               <h4 className="font-bold text-sm text-[#2D2D2A]">{selectedThread.authorName}</h4>
-                              <p className="text-[10px] uppercase tracking-widest text-[#4C4B40]/60">
-                                {selectedThread.createdAt?.toDate().toLocaleDateString()}
-                              </p>
+                              <p className="text-[10px] uppercase tracking-widest text-[#4C4B40]/60">{selectedThread.createdAt?.toDate().toLocaleDateString()}</p>
                             </div>
                           </div>
                           <h2 className="text-3xl md:text-4xl font-serif mb-6 leading-tight">{selectedThread.title}</h2>
-                          <p className="text-[#4C4B40] text-lg leading-relaxed font-light whitespace-pre-wrap">
-                            {selectedThread.content}
-                          </p>
+                          <p className="text-[#4C4B40] text-lg leading-relaxed font-light whitespace-pre-wrap">{selectedThread.content}</p>
                         </div>
-
                         <div className="flex-grow border-t border-black/10 pt-10">
                           <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] text-[#2D2D2A] mb-8">Responses</h4>
                           <CommentsList threadId={selectedThread.id} user={user} />
@@ -433,13 +259,8 @@
                       </motion.div>
                     ) : (
                       <div className="flex flex-col items-center justify-center flex-grow text-center space-y-6">
-                        <div className="w-20 h-20 rounded-full bg-black/5 flex items-center justify-center">
-                          <Compass className="w-10 h-10 text-black/20" />
-                        </div>
-                        <div className="max-w-xs">
-                          <h3 className="text-xl font-serif mb-2">Select a thread</h3>
-                          <p className="text-sm text-[#4C4B40]/60 font-light">Choose a discussion from the list to read reflections and share your own.</p>
-                        </div>
+                        <Compass className="w-10 h-10 text-black/20" />
+                        <h3 className="text-xl font-serif">Select a thread</h3>
                       </div>
                     )}
                   </AnimatePresence>
@@ -450,61 +271,17 @@
             <AnimatePresence>
               {isNewThreadModalOpen && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-                  <motion.div 
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    onClick={() => setIsNewThreadModalOpen(false)}
-                    className="absolute inset-0 bg-black/60 backdrop-blur-md"
-                  />
-                  <motion.div 
-                    initial={{ opacity: 0, scale: 0.9, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                    className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden"
-                  >
-                    <div className="p-8 md:p-12">
-                      <div className="flex items-center justify-between mb-10">
-                        <h2 className="text-3xl font-serif">Start a New <span className="italic">Reflection</span></h2>
-                        <button onClick={() => setIsNewThreadModalOpen(false)} className="p-2 hover:bg-[#E8EDF3] rounded-full transition-colors">
-                          <X className="w-6 h-6" />
-                        </button>
-                      </div>
-                      <form onSubmit={handleCreateThread} className="space-y-6">
-                        {createThreadError && (
-                          <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-medium">
-                            {createThreadError}
-                          </div>
-                        )}
-                        <div>
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-[#4C4B40]/60 mb-2 block">Thread Title</label>
-                          <input 
-                            required
-                            value={newThreadTitle}
-                            onChange={(e) => setNewThreadTitle(e.target.value)}
-                            placeholder="e.g., Navigating the first holiday alone"
-                            className="w-full bg-[#E8EDF3]/30 border border-black/5 rounded-2xl px-6 py-4 text-[#2D2D2A] focus:outline-none focus:border-[#D4A373] transition-colors"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] font-bold uppercase tracking-widest text-[#4C4B40]/60 mb-2 block">Your Thoughts</label>
-                          <textarea 
-                            required
-                            value={newThreadContent}
-                            onChange={(e) => setNewThreadContent(e.target.value)}
-                            placeholder="Share your experience or ask a question..."
-                            rows={6}
-                            className="w-full bg-[#E8EDF3]/30 border border-black/5 rounded-2xl px-6 py-4 text-[#2D2D2A] focus:outline-none focus:border-[#D4A373] transition-colors resize-none"
-                          />
-                        </div>
-                        <button 
-                          type="submit"
-                          className="w-full py-5 bg-[#2D2D2A] text-[#E8EDF3] rounded-full text-xs font-bold uppercase tracking-widest hover:bg-[#4C4B40] transition-all shadow-xl shadow-black/20"
-                        >
-                          Post to Base Camp
-                        </button>
-                      </form>
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsNewThreadModalOpen(false)} className="absolute inset-0 bg-black/60 backdrop-blur-md" />
+                  <motion.div initial={{ opacity: 0, scale: 0.9, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.9, y: 20 }} className="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl p-8 md:p-12">
+                    <div className="flex items-center justify-between mb-10">
+                      <h2 className="text-3xl font-serif">Start a New Reflection</h2>
+                      <button onClick={() => setIsNewThreadModalOpen(false)}><X className="w-6 h-6" /></button>
                     </div>
+                    <form onSubmit={handleCreateThread} className="space-y-6">
+                      <input required value={newThreadTitle} onChange={(e) => setNewThreadTitle(e.target.value)} placeholder="Thread Title" className="w-full bg-[#E8EDF3]/30 border border-black/5 rounded-2xl px-6 py-4" />
+                      <textarea required value={newThreadContent} onChange={(e) => setNewThreadContent(e.target.value)} placeholder="Your Thoughts" rows={6} className="w-full bg-[#E8EDF3]/30 border border-black/5 rounded-2xl px-6 py-4 resize-none" />
+                      <button type="submit" className="w-full py-5 bg-[#2D2D2A] text-[#E8EDF3] rounded-full text-xs font-bold uppercase tracking-widest">Post to Base Camp</button>
+                    </form>
                   </motion.div>
                 </div>
               )}
@@ -516,34 +293,24 @@
       function CommentsList({ threadId, user }) {
         const [comments, setComments] = useState([]);
         const [newComment, setNewComment] = useState("");
-
         useEffect(() => {
           const q = query(collection(db, "threads", threadId, "comments"), orderBy("createdAt", "asc"));
           const unsubscribe = onSnapshot(q, (snapshot) => {
-            const commentData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setComments(commentData);
-          }, (error) => {
-            handleFirestoreError(error, OperationType.GET, `threads/${threadId}/comments`);
-          });
+            setComments(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
+          }, (error) => handleFirestoreError(error, OperationType.GET, `threads/${threadId}/comments`));
           return () => unsubscribe();
         }, [threadId]);
 
         const handleAddComment = async (e) => {
           e.preventDefault();
           if (!user || !newComment) return;
-
           try {
             await addDoc(collection(db, "threads", threadId, "comments"), {
-              content: newComment,
-              authorId: user.uid,
-              authorName: user.displayName || "Anonymous",
-              authorPhoto: user.photoURL || "",
-              createdAt: Timestamp.now()
+              content: newComment, authorId: user.uid, authorName: user.displayName || "Anonymous",
+              authorPhoto: user.photoURL || "", createdAt: Timestamp.now()
             });
             setNewComment("");
-          } catch (error) {
-            handleFirestoreError(error, OperationType.CREATE, `threads/${threadId}/comments`);
-          }
+          } catch (error) { alert(error.message); }
         };
 
         return (
@@ -552,84 +319,44 @@
               {comments.map((comment) => (
                 <div key={comment.id} className="flex gap-4">
                   <div className="w-8 h-8 rounded-full overflow-hidden bg-[#4C4B40]/10 flex-shrink-0">
-                    {comment.authorPhoto ? (
-                      <img src={comment.authorPhoto} alt={comment.authorName} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                    ) : (
-                      <User className="w-4 h-4 m-2" />
-                    )}
+                    {comment.authorPhoto ? <img src={comment.authorPhoto} className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : <User className="w-4 h-4 m-2" />}
                   </div>
                   <div className="flex-grow">
                     <div className="flex items-center gap-2 mb-1">
                       <span className="text-xs font-bold text-[#2D2D2A]">{comment.authorName}</span>
-                      <span className="text-[10px] text-[#4C4B40]/40 uppercase tracking-widest">
-                        {comment.createdAt?.toDate().toLocaleDateString()}
-                      </span>
+                      <span className="text-[10px] text-[#4C4B40]/40 uppercase tracking-widest">{comment.createdAt?.toDate().toLocaleDateString()}</span>
                     </div>
                     <p className="text-sm text-[#4C4B40] leading-relaxed font-light">{comment.content}</p>
                   </div>
                 </div>
               ))}
             </div>
-
             {user ? (
               <form onSubmit={handleAddComment} className="relative mt-10">
-                <input 
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add a response..."
-                  className="w-full bg-white border border-black/10 rounded-full px-8 py-4 text-sm focus:outline-none focus:border-[#D4A373] transition-colors pr-16"
-                />
-                <button 
-                  type="submit"
-                  className="absolute right-2 top-2 bottom-2 aspect-square bg-[#2D2D2A] text-[#E8EDF3] rounded-full flex items-center justify-center hover:bg-[#D4A373] hover:text-[#2D2D2A] transition-colors"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+                <input value={newComment} onChange={(e) => setNewComment(e.target.value)} placeholder="Add a response..." className="w-full bg-white border border-black/10 rounded-full px-8 py-4 text-sm pr-16" />
+                <button type="submit" className="absolute right-2 top-2 bottom-2 aspect-square bg-[#2D2D2A] text-[#E8EDF3] rounded-full flex items-center justify-center"><Send className="w-4 h-4" /></button>
               </form>
-            ) : (
-              <div className="p-6 bg-white/50 rounded-2xl border border-dashed border-black/10 text-center">
-                <p className="text-xs text-[#4C4B40]/60 font-light italic">Please sign in to join the conversation.</p>
-              </div>
-            )}
+            ) : <p className="text-xs text-[#4C4B40]/60 font-light italic text-center">Please sign in to join the conversation.</p>}
           </div>
         );
       }
 
       function Navbar() {
         const [isScrolled, setIsScrolled] = useState(false);
-
         useEffect(() => {
           const handleScroll = () => setIsScrolled(window.scrollY > 50);
           window.addEventListener("scroll", handleScroll);
           return () => window.removeEventListener("scroll", handleScroll);
         }, []);
-
         return (
-          <motion.nav 
-            initial={{ y: -100 }}
-            animate={{ y: 0 }}
-            className={cn(
-              "fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 transition-all duration-300",
-              isScrolled ? "backdrop-blur-md bg-white/70 border-b border-black/5 py-4" : "bg-transparent"
-            )}
-          >
-            <div className="flex items-center gap-2">
-              <Mountain className="w-6 h-6 text-[#4C4B40]" />
-              <span className="text-sm font-bold tracking-widest uppercase text-[#2D2D2A]">Base Camping</span>
-            </div>
+          <motion.nav initial={{ y: -100 }} animate={{ y: 0 }} className={cn("fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-8 py-6 transition-all duration-300", isScrolled ? "backdrop-blur-md bg-white/70 border-b border-black/5 py-4" : "bg-transparent")}>
+            <div className="flex items-center gap-2"><Mountain className="w-6 h-6 text-[#4C4B40]" /><span className="text-sm font-bold tracking-widest uppercase text-[#2D2D2A]">Base Camping</span></div>
             <div className="hidden md:flex items-center gap-8 text-[10px] font-bold tracking-widest uppercase text-[#4C4B40]">
-              <a href="#metaphor" className="hover:text-[#D4A373] transition-colors">The Metaphor</a>
-              <a href="#book" className="hover:text-[#D4A373] transition-colors">The Book</a>
-              <a href="#community" className="hover:text-[#D4A373] transition-colors">Community</a>
-              <a href="#author" className="hover:text-[#D4A373] transition-colors">The Author</a>
-              <a 
-                href="https://www.amazon.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="px-6 py-3 bg-[#2D2D2A] text-[#E8EDF3] rounded-full hover:bg-[#4C4B40] transition-all hover:scale-105 active:scale-95 shadow-lg shadow-black/20"
-              >
-                Pre-Order
-              </a>
+              <a href="#metaphor" className="hover:text-[#D4A373]">The Metaphor</a>
+              <a href="#book" className="hover:text-[#D4A373]">The Book</a>
+              <a href="#community" className="hover:text-[#D4A373]">Community</a>
+              <a href="#author" className="hover:text-[#D4A373]">The Author</a>
+              <a href="https://www.amazon.com" target="_blank" className="px-6 py-3 bg-[#2D2D2A] text-[#E8EDF3] rounded-full">Pre-Order</a>
             </div>
           </motion.nav>
         );
@@ -638,83 +365,20 @@
       function Hero() {
         return (
           <section className="relative h-screen flex items-center justify-center overflow-hidden pt-20">
-            <motion.div 
-              initial={{ scale: 1.1 }}
-              animate={{ scale: 1 }}
-              transition={{ duration: 2, ease: "easeOut" }}
-              className="absolute inset-0 z-0"
-            >
-              <img 
-                src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000" 
-                alt="Majestic Mountain Range"
-                className="w-full h-full object-cover opacity-90"
-                referrerPolicy="no-referrer"
-              />
+            <motion.div initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 2 }} className="absolute inset-0 z-0">
+              <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover opacity-90" referrerPolicy="no-referrer" />
               <div className="absolute inset-0 bg-gradient-to-b from-[#E8EDF3]/20 via-transparent to-[#E8EDF3]" />
             </motion.div>
-
             <div className="relative z-10 text-center px-4 max-w-5xl">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 0.2 }}
-              >
-                <span className="inline-block mb-6 px-5 py-1.5 border border-black/20 rounded-full text-[10px] font-bold tracking-[0.3em] uppercase text-[#4C4B40] bg-white/40 backdrop-blur-md shadow-sm">
-                  Beyond the Empty Nest
-                </span>
-                <h1 className="text-7xl md:text-9xl font-serif mb-8 leading-[0.85] text-[#2D2D2A] tracking-tighter">
-                  Base <span className="italic font-light">Camping</span>
-                </h1>
-                <p className="text-xl md:text-2xl text-[#4C4B40] font-light max-w-3xl mx-auto mb-12 leading-relaxed">
-                  The empty nest isn’t an ending—it’s an opening. A sacred opportunity where new dreams are built and a fresh sense of calling takes shape.
-                </p>
+              <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1 }}>
+                <span className="inline-block mb-6 px-5 py-1.5 border border-black/20 rounded-full text-[10px] font-bold tracking-[0.3em] uppercase text-[#4C4B40] bg-white/40 backdrop-blur-md shadow-sm">Beyond the Empty Nest</span>
+                <h1 className="text-7xl md:text-9xl font-serif mb-8 leading-[0.85] text-[#2D2D2A] tracking-tighter">Base <span className="italic font-light">Camping</span></h1>
+                <p className="text-xl md:text-2xl text-[#4C4B40] font-light max-w-3xl mx-auto mb-12 leading-relaxed">The empty nest isn’t an ending—it’s an opening. A sacred opportunity where new dreams are built and a fresh sense of calling takes shape.</p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                  <button className="group w-full sm:w-auto px-10 py-5 bg-[#2D2D2A] text-[#E8EDF3] rounded-full text-xs font-bold tracking-widest uppercase hover:bg-[#4C4B40] transition-all hover:scale-105 shadow-xl shadow-black/20 flex items-center justify-center gap-2">
-                    Explore the Guide
-                    <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                  <a 
-                    href="https://www.amazon.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="w-full sm:w-auto px-10 py-5 border border-black/20 text-[#2D2D2A] rounded-full text-xs font-bold tracking-widest uppercase hover:bg-white/60 backdrop-blur-sm transition-all text-center"
-                  >
-                    Pre-Order Now
-                  </a>
+                  <button className="px-10 py-5 bg-[#2D2D2A] text-[#E8EDF3] rounded-full text-xs font-bold uppercase tracking-widest flex items-center gap-2">Explore the Guide <ChevronRight className="w-4 h-4" /></button>
+                  <a href="https://www.amazon.com" target="_blank" className="px-10 py-5 border border-black/20 text-[#2D2D2A] rounded-full text-xs font-bold uppercase tracking-widest">Pre-Order Now</a>
                 </div>
               </motion.div>
-            </div>
-
-            <div className="absolute bottom-0 left-0 w-full h-64 opacity-20 pointer-events-none overflow-hidden">
-              <svg viewBox="0 0 1000 100" className="w-full h-full text-[#4C4B40]">
-                <motion.path 
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 2, delay: 1 }}
-                  d="M0,50 Q250,10 500,50 T1000,50" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="0.5" 
-                />
-                <motion.path 
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 2.5, delay: 1.2 }}
-                  d="M0,60 Q250,20 500,60 T1000,60" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="0.5" 
-                />
-                <motion.path 
-                  initial={{ pathLength: 0, opacity: 0 }}
-                  animate={{ pathLength: 1, opacity: 1 }}
-                  transition={{ duration: 3, delay: 1.4 }}
-                  d="M0,70 Q250,30 500,70 T1000,70" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  strokeWidth="0.5" 
-                />
-              </svg>
             </div>
           </section>
         );
@@ -724,72 +388,32 @@
         return (
           <section id="metaphor" className="py-32 px-8 bg-white overflow-hidden">
             <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.2fr] gap-20 items-center">
-              <motion.div 
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8 }}
-                className="space-y-10"
-              >
+              <div className="space-y-10">
                 <div className="w-20 h-1.5 bg-[#D4A373] rounded-full" />
-                <h2 className="text-5xl md:text-6xl leading-[1.1] tracking-tight">
-                  You are the <span className="italic font-light">Base Camp</span>. <br />
-                  They are the <span className="italic font-light">Climbers</span>.
-                </h2>
-                <p className="text-[#4C4B40] leading-relaxed text-xl font-light">
-                  The phrase “empty nest” has become cultural shorthand for a transition many parents quietly dread—children leaving home, routines shifting, and the house growing suddenly still. But what if the emptiness isn’t an ending at all? What if it’s an opening?
-                </p>
+                <h2 className="text-5xl md:text-6xl leading-[1.1] tracking-tight">You are the <span className="italic font-light">Base Camp</span>. <br />They are the <span className="italic font-light">Climbers</span>.</h2>
+                <p className="text-[#4C4B40] leading-relaxed text-xl font-light">The phrase “empty nest” has become cultural shorthand for a transition many parents quietly dread. But what if the emptiness isn’t an ending at all? What if it’s an opening?</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-10">
                   <div className="space-y-4 p-6 rounded-2xl bg-[#E8EDF3]/30 border border-black/5">
-                    <div className="w-12 h-12 rounded-xl bg-[#D4A373]/10 flex items-center justify-center">
-                      <Tent className="w-6 h-6 text-[#D4A373]" />
-                    </div>
+                    <Tent className="w-6 h-6 text-[#D4A373]" />
                     <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-[#2D2D2A]">Reliability</h4>
                     <p className="text-sm text-[#4C4B40]/80 leading-relaxed">A safe haven when the weather turns harsh and the path becomes uncertain.</p>
                   </div>
                   <div className="space-y-4 p-6 rounded-2xl bg-[#E8EDF3]/30 border border-black/5">
-                    <div className="w-12 h-12 rounded-xl bg-[#D4A373]/10 flex items-center justify-center">
-                      <Compass className="w-6 h-6 text-[#D4A373]" />
-                    </div>
+                    <Compass className="w-6 h-6 text-[#D4A373]" />
                     <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-[#2D2D2A]">Wisdom</h4>
                     <p className="text-sm text-[#4C4B40]/80 leading-relaxed">Providing the long-view perspective that only comes from having walked the valley floor.</p>
                   </div>
                 </div>
-              </motion.div>
-              
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1 }}
-                className="relative"
-              >
-                <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-[0_40px_80px_-20px_rgba(0,0,0,0.2)]">
-                  <img 
-                    src="https://scontent-den2-1.xx.fbcdn.net/v/t39.30808-6/505441402_10232767610029828_7191845792755838213_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=102&ccb=1-7&_nc_sid=53a332&_nc_ohc=8toJCiOgb1gQ7kNvwG-o07C&_nc_oc=AdpG6mZAeq8l4TfuAK8QYrBjcQqY41UIhETaaZeQDdOagmJnX5CMzORHI9PDNuHzViU&_nc_zt=23&_nc_ht=scontent-den2-1.xx&_nc_gid=0NJVU2i5wMRV0-N_--XFaQ&_nc_ss=8&oh=00_AfwIX6ZWBWIxuQIwr-Tr4i-v-2KLD0YC0ErfPS9RWFTYGA&oe=69C15C45" 
-                    alt="Base camp"
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                  <div className="absolute inset-0 bg-[#2D2D2A]/10 mix-blend-multiply" />
+              </div>
+              <div className="relative">
+                <div className="relative aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl">
+                  <img src="https://scontent-den2-1.xx.fbcdn.net/v/t39.30808-6/505441402_10232767610029828_7191845792755838213_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=102&ccb=1-7&_nc_sid=53a332&_nc_ohc=8toJCiOgb1gQ7kNvwG-o07C&_nc_oc=AdpG6mZAeq8l4TfuAK8QYrBjcQqY41UIhETaaZeQDdOagmJnX5CMzORHI9PDNuHzViU&_nc_zt=23&_nc_ht=scontent-den2-1.xx&_nc_gid=0NJVU2i5wMRV0-N_--XFaQ&_nc_ss=8&oh=00_AfwIX6ZWBWIxuQIwr-Tr4i-v-2KLD0YC0ErfPS9RWFTYGA&oe=69C15C45" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
                 </div>
-                
-                <motion.div 
-                  initial={{ y: 50, opacity: 0 }}
-                  whileInView={{ y: 0, opacity: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.5, duration: 0.8 }}
-                  className="absolute -bottom-10 -left-10 md:-left-20 right-10 md:right-auto md:w-[400px] p-10 bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20"
-                >
-                  <p className="text-xl italic font-serif text-[#2D2D2A] leading-relaxed">
-                    "I lift up my eyes to the mountains—where does my help come from? My help comes from the Lord, the Maker of heaven and earth."
-                  </p>
-                  <div className="mt-6 flex items-center gap-4">
-                    <div className="w-8 h-[1px] bg-[#D4A373]" />
-                    <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#4C4B40]">— Psalm 121:1-2</p>
-                  </div>
-                </motion.div>
-              </motion.div>
+                <div className="absolute -bottom-10 -left-10 md:-left-20 right-10 md:right-auto md:w-[400px] p-10 bg-white/90 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20">
+                  <p className="text-xl italic font-serif text-[#2D2D2A]">"I lift up my eyes to the mountains—where does my help come from? My help comes from the Lord, the Maker of heaven and earth."</p>
+                  <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-[#4C4B40] mt-6">— Psalm 121:1-2</p>
+                </div>
+              </div>
             </div>
           </section>
         );
@@ -797,26 +421,11 @@
 
       function QuoteSection() {
         return (
-          <section className="py-32 bg-[#2D2D2A] text-[#E8EDF3] relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
-              <Mountain className="absolute -top-20 -left-20 w-[600px] h-[600px]" />
-              <Mountain className="absolute -bottom-20 -right-20 w-[600px] h-[600px]" />
-            </div>
-            <div className="max-w-4xl mx-auto px-8 text-center relative z-10">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="space-y-12"
-              >
-                <h2 className="text-4xl md:text-6xl font-serif italic leading-tight">
-                  "The empty nest isn't a void to be filled, but a base camp to be built."
-                </h2>
-                <div className="w-16 h-1 bg-[#D4A373] mx-auto" />
-                <p className="text-[#E8EDF3]/60 text-sm uppercase tracking-[0.4em] font-bold">
-                  The Core Philosophy
-                </p>
-              </motion.div>
+          <section className="py-32 bg-[#2D2D2A] text-[#E8EDF3] relative overflow-hidden text-center">
+            <div className="max-w-4xl mx-auto px-8 space-y-12">
+              <h2 className="text-4xl md:text-6xl font-serif italic leading-tight">"The empty nest isn't a void to be filled, but a base camp to be built."</h2>
+              <div className="w-16 h-1 bg-[#D4A373] mx-auto" />
+              <p className="text-[#E8EDF3]/60 text-sm uppercase tracking-[0.4em] font-bold">The Core Philosophy</p>
             </div>
           </section>
         );
@@ -824,122 +433,32 @@
 
       function BookDetails() {
         const chapters = [
-          { 
-            title: "The First Ascent", 
-            desc: "Understanding the psychological and spiritual transition from parenting children to parenting adults.",
-            icon: <Mountain className="w-5 h-5" />
-          },
-          { 
-            title: "Packing Light", 
-            desc: "Discerning what your adult children truly need from you—and what they must carry themselves.",
-            icon: <MapIcon className="w-5 h-5" />
-          },
-          { 
-            title: "The Valley of Purpose", 
-            desc: "Finding your own identity and calling beyond the 'Empty Nest' label in this new season.",
-            icon: <Compass className="w-5 h-5" />
-          },
-          { 
-            title: "Grounded in Truth", 
-            desc: "Biblical principles for navigating complex family dynamics with grace and wisdom.",
-            icon: <BookOpen className="w-5 h-5" />
-          },
+          { title: "The First Ascent", desc: "Understanding the psychological and spiritual transition.", icon: <Mountain className="w-5 h-5" /> },
+          { title: "Packing Light", desc: "Discerning what your adult children truly need from you.", icon: <MapIcon className="w-5 h-5" /> },
+          { title: "The Valley of Purpose", desc: "Finding your own identity and calling beyond the label.", icon: <Compass className="w-5 h-5" /> },
+          { title: "Grounded in Truth", desc: "Biblical principles for navigating complex family dynamics.", icon: <BookOpen className="w-5 h-5" /> },
         ];
-
         return (
-          <section id="book" className="py-32 px-8 bg-[#E8EDF3] relative">
+          <section id="book" className="py-32 px-8 bg-[#E8EDF3]">
             <div className="max-w-7xl mx-auto">
               <div className="flex flex-col md:flex-row md:items-end justify-between mb-20 gap-8">
                 <div className="max-w-2xl">
                   <span className="text-[#D4A373] font-bold text-[10px] tracking-[0.3em] uppercase mb-4 block">The Guidebook</span>
                   <h2 className="text-5xl md:text-7xl font-serif leading-none tracking-tighter">Inside the <span className="italic">Pages</span></h2>
                 </div>
-                <p className="text-[#4C4B40] max-w-lg text-lg font-light leading-relaxed">
-                  Drawing from his personal journey, professional experience, and Christian faith, Justin Schmitt invites readers to see this season not as a retreat from purpose, but a return to it.
-                </p>
+                <p className="text-[#4C4B40] max-w-lg text-lg font-light">Drawing from his personal journey, Justin Schmitt invites readers to see this season not as a retreat from purpose, but a return to it.</p>
               </div>
-
               <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                 {chapters.map((chapter, i) => (
-                  <motion.div 
-                    key={i}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.1 }}
-                    whileHover={{ y: -10, backgroundColor: "rgba(255,255,255,1)" }}
-                    className="p-10 bg-white/50 backdrop-blur-sm rounded-[2rem] border border-black/5 flex flex-col justify-between transition-all duration-300 group shadow-sm hover:shadow-xl"
-                  >
+                  <div key={i} className="p-10 bg-white/50 rounded-[2rem] border border-black/5 flex flex-col justify-between hover:bg-white transition-all shadow-sm hover:shadow-xl">
                     <div>
-                      <div className="w-12 h-12 rounded-2xl bg-[#2D2D2A] text-[#E8EDF3] flex items-center justify-center mb-8 group-hover:bg-[#D4A373] group-hover:text-[#2D2D2A] transition-colors">
-                        {chapter.icon}
-                      </div>
+                      <div className="w-12 h-12 rounded-2xl bg-[#2D2D2A] text-[#E8EDF3] flex items-center justify-center mb-8">{chapter.icon}</div>
                       <h3 className="text-2xl mb-4 font-serif">{chapter.title}</h3>
-                      <p className="text-sm text-[#4C4B40] leading-relaxed font-light">{chapter.desc}</p>
+                      <p className="text-sm text-[#4C4B40] font-light">{chapter.desc}</p>
                     </div>
-                    <div className="mt-10 flex items-center gap-2 text-[10px] font-bold tracking-widest uppercase text-[#2D2D2A]/40">
-                      Chapter 0{i + 1} — Coming Soon
-                    </div>
-                  </motion.div>
+                    <div className="mt-10 text-[10px] font-bold tracking-widest uppercase text-[#2D2D2A]/40">Chapter 0{i + 1} — Coming Soon</div>
+                  </div>
                 ))}
-              </div>
-
-              <div className="mt-24 relative rounded-[3rem] overflow-hidden bg-[#2D2D2A] text-[#E8EDF3] shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)]">
-                <div className="absolute inset-0 opacity-10">
-                  <img 
-                    src="https://images.unsplash.com/photo-1501555088652-021faa106b9b?auto=format&fit=crop&q=80&w=2000" 
-                    alt="Mountain climber"
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div className="relative z-10 flex flex-col lg:flex-row items-center gap-16 p-12 md:p-20">
-                  <div className="lg:w-3/5 space-y-8">
-                    <h2 className="text-4xl md:text-6xl font-serif leading-tight">
-                      Ready for the <span className="italic">next season</span> of your ascent?
-                    </h2>
-                    <p className="text-[#E8EDF3]/70 text-lg md:text-xl font-light leading-relaxed max-w-2xl">
-                      This isn’t a season to endure. It’s a season to embrace. If you’re a parent standing at the threshold of what’s next, this book will help you discover that your best climb may be just ahead.
-                    </p>
-                    <div className="flex flex-wrap gap-4">
-                      <a 
-                        href="https://www.amazon.com"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="px-10 py-5 bg-[#D4A373] text-[#2D2D2A] rounded-full text-xs font-bold tracking-widest uppercase hover:bg-white transition-all hover:scale-105 shadow-lg shadow-[#D4A373]/20 text-center"
-                      >
-                        Pre-Order Now
-                      </a>
-                      <button className="px-10 py-5 border border-white/20 text-white rounded-full text-xs font-bold tracking-widest uppercase hover:bg-white/10 transition-all">
-                        Download Sample Chapter
-                      </button>
-                    </div>
-                  </div>
-                  
-                  <div className="lg:w-2/5 flex justify-center perspective-1000">
-                     <motion.div 
-                      whileHover={{ rotateY: -10, rotateX: 5 }}
-                      className="w-72 h-96 bg-[#4C4B40] rounded-xl shadow-[20px_20px_60px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center p-10 text-center border-b-8 border-r-8 border-[#D4A373]/20 relative overflow-hidden group"
-                     >
-                        <div className="absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity">
-                           <svg viewBox="0 0 100 100" className="w-full h-full fill-current">
-                              <path d="M0,100 L50,20 L100,100 Z" />
-                           </svg>
-                        </div>
-                        <div className="relative z-10 space-y-4">
-                          <Mountain className="w-12 h-12 mx-auto text-[#D4A373] mb-4" />
-                          <h4 className="font-serif text-3xl leading-tight text-white">Base <br />Camping</h4>
-                          <div className="w-8 h-0.5 bg-[#D4A373] mx-auto" />
-                          <p className="text-[10px] uppercase tracking-[0.3em] text-[#E8EDF3]/60 font-bold">Justin Schmitt</p>
-                        </div>
-                        <div className="absolute top-0 right-0 p-4">
-                          <div className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-[8px] font-bold text-white/40 uppercase tracking-tighter">
-                            Book
-                          </div>
-                        </div>
-                     </motion.div>
-                  </div>
-                </div>
               </div>
             </div>
           </section>
@@ -948,53 +467,20 @@
 
       function AuthorSection() {
         return (
-          <section id="author" className="py-32 px-8 bg-white relative overflow-hidden">
+          <section id="author" className="py-32 px-8 bg-white overflow-hidden">
             <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center gap-20">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                className="relative flex-shrink-0"
-              >
-                <div className="w-64 h-64 md:w-80 md:h-80 rounded-[3rem] overflow-hidden bg-[#E8EDF3] shadow-2xl relative z-10">
-                  <img 
-                    src="https://scontent-den2-1.xx.fbcdn.net/v/t39.30808-6/585056595_10235399949716675_8801284874818327176_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=101&ccb=1-7&_nc_sid=53a332&_nc_ohc=p9KysskaON4Q7kNvwEt1RVf&_nc_oc=Adoj5wr924SkDZPY8DF6biWcSRYZaCxeFkJ1xJAw1o2QOa6WVzY3AlDv8AdUPo_a3Vo&_nc_zt=23&_nc_ht=scontent-den2-1.xx&_nc_gid=bBG5Mqd0m_Jt9ZmVwWXzPg&_nc_ss=8&oh=00_AfzJg5MYRA3MOC1FE3MlcwhJH7JK4UYF5W1a_UtOEqIUFA&oe=69C12874" 
-                    alt="Justin Schmitt"
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div className="absolute -top-6 -right-6 w-32 h-32 bg-[#D4A373]/10 rounded-full blur-3xl -z-10" />
-                <div className="absolute -bottom-10 -left-10 w-48 h-48 bg-[#2D2D2A]/5 rounded-full blur-3xl -z-10" />
-              </motion.div>
-
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="space-y-8"
-              >
-                <div className="flex items-center gap-3 text-[#D4A373]">
-                  <div className="w-10 h-[1px] bg-[#D4A373]" />
-                  <span className="text-[10px] font-bold tracking-[0.3em] uppercase">The Author</span>
-                </div>
+              <div className="w-64 h-64 md:w-80 md:h-80 rounded-[3rem] overflow-hidden bg-[#E8EDF3] shadow-2xl">
+                <img src="https://scontent-den2-1.xx.fbcdn.net/v/t39.30808-6/585056595_10235399949716675_8801284874818327176_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=101&ccb=1-7&_nc_sid=53a332&_nc_ohc=p9KysskaON4Q7kNvwEt1RVf&_nc_oc=Adoj5wr924SkDZPY8DF6biWcSRYZaCxeFkJ1xJAw1o2QOa6WVzY3AlDv8AdUPo_a3Vo&_nc_zt=23&_nc_ht=scontent-den2-1.xx&_nc_gid=bBG5Mqd0m_Jt9ZmVwWXzPg&_nc_ss=8&oh=00_AfzJg5MYRA3MOC1FE3MlcwhJH7JK4UYF5W1a_UtOEqIUFA&oe=69C12874" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+              </div>
+              <div className="space-y-8">
                 <h2 className="text-5xl md:text-6xl font-serif">Justin Schmitt</h2>
-                <p className="text-[#4C4B40] leading-relaxed text-lg font-light">
-                  Justin Schmitt believes life’s most meaningful seasons aren’t always the busiest ones. A Christian, husband, father, and lifelong mountain-lover, Justin spent decades in a career marked by leadership, service, and impact before choosing to retire and return home to Durango, Colorado—where his love for the outdoors, reflection, and faith first took root. He now teaches skiing in the winters, a front-row seat to courage, patience, and progress—one run at a time.
-                </p>
+                <p className="text-[#4C4B40] leading-relaxed text-lg font-light">Justin Schmitt retired to Durango, Colorado—where his love for the outdoors, reflection, and faith first took root. He now teaches skiing in the winters, a front-row seat to courage, patience, and progress—one run at a time.</p>
                 <div className="flex flex-wrap gap-8 pt-4">
                   {['Twitter', 'Instagram', 'Newsletter'].map((social) => (
-                    <a 
-                      key={social}
-                      href="#" 
-                      className="group flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-[#2D2D2A] hover:text-[#D4A373] transition-colors"
-                    >
-                      {social}
-                      <ArrowRight className="w-3 h-3 group-hover:translate-x-1 transition-transform" />
-                    </a>
+                    <a key={social} href="#" className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#2D2D2A] hover:text-[#D4A373]">{social} <ArrowRight className="w-3 h-3" /></a>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             </div>
           </section>
         );
@@ -1003,73 +489,16 @@
       function Footer() {
         return (
           <footer className="py-20 px-8 bg-[#E8EDF3] border-t border-black/5">
-            <div className="max-w-7xl mx-auto">
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-12 mb-20">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2">
-                    <Mountain className="w-6 h-6 text-[#4C4B40]" />
-                    <span className="text-sm font-bold tracking-widest uppercase text-[#2D2D2A]">Base Camping</span>
-                  </div>
-                  <p className="text-sm text-[#4C4B40]/60 leading-relaxed font-light">
-                    Building a life purpose beyond the empty nest. A guide for parents of adult children.
-                  </p>
-                </div>
-                
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#2D2D2A]">Navigation</h4>
-                  <ul className="space-y-4 text-sm text-[#4C4B40]/70 font-light">
-                    <li><a href="#metaphor" className="hover:text-[#2D2D2A] transition-colors">The Metaphor</a></li>
-                    <li><a href="#book" className="hover:text-[#2D2D2A] transition-colors">The Book</a></li>
-                    <li><a href="#author" className="hover:text-[#2D2D2A] transition-colors">The Author</a></li>
-                  </ul>
-                </div>
-
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#2D2D2A]">Resources</h4>
-                  <ul className="space-y-4 text-sm text-[#4C4B40]/70 font-light">
-                    <li><a href="#" className="hover:text-[#2D2D2A] transition-colors">Sample Chapter</a></li>
-                    <li><a href="#" className="hover:text-[#2D2D2A] transition-colors">Discussion Guide</a></li>
-                    <li><a href="#" className="hover:text-[#2D2D2A] transition-colors">Podcast</a></li>
-                  </ul>
-                </div>
-
-                <div className="space-y-6">
-                  <h4 className="text-[10px] font-bold tracking-[0.3em] uppercase text-[#2D2D2A]">Stay Updated</h4>
-                  <div className="flex gap-2">
-                    <input 
-                      type="email" 
-                      placeholder="Email address" 
-                      className="bg-white border border-black/10 rounded-full px-6 py-3 text-sm w-full focus:outline-none focus:border-[#D4A373] transition-colors"
-                    />
-                    <button className="p-3 bg-[#2D2D2A] text-[#E8EDF3] rounded-full hover:bg-[#4C4B40] transition-colors">
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex flex-col md:flex-row items-center justify-between gap-8 pt-12 border-t border-black/5">
-                <p className="text-[10px] text-[#4C4B40]/40 uppercase tracking-[0.2em] font-bold">
-                  © 2026 Justin Schmitt. All Rights Reserved.
-                </p>
-                <div className="flex gap-8 text-[10px] font-bold tracking-[0.2em] uppercase text-[#4C4B40]/40">
-                  <a href="#" className="hover:text-[#2D2D2A] transition-colors">Privacy Policy</a>
-                  <a href="#" className="hover:text-[#2D2D2A] transition-colors">Terms of Service</a>
-                </div>
-              </div>
+            <div className="max-w-7xl mx-auto text-center space-y-12">
+              <div className="flex items-center justify-center gap-2"><Mountain className="w-6 h-6 text-[#4C4B40]" /><span className="text-sm font-bold uppercase text-[#2D2D2A]">Base Camping</span></div>
+              <p className="text-[10px] text-[#4C4B40]/40 uppercase tracking-[0.2em] font-bold">© 2026 Justin Schmitt. All Rights Reserved.</p>
             </div>
           </footer>
         );
       }
 
       const rootElement = document.getElementById('root');
-      if (rootElement) {
-        createRoot(rootElement).render(
-          <StrictMode>
-            <App />
-          </StrictMode>,
-        );
-      }
+      if (rootElement) { createRoot(rootElement).render(<StrictMode><App /></StrictMode>); }
     </script>
   </body>
 </html>
