@@ -107,7 +107,8 @@
       import { 
         Mountain, Tent, Map as MapIcon, Compass, BookOpen, 
         User, ChevronRight, ArrowRight, MessageSquare, 
-        Send, LogIn, Plus, X, ArrowLeft, Star, ClipboardList, PenTool, Flame, Heart, Printer
+        Send, LogIn, Plus, X, ArrowLeft, Star, ClipboardList, PenTool, Flame, Heart, Printer,
+        ArrowBigUp, ArrowBigDown, Share2, MoreHorizontal
       } from "https://esm.sh/lucide-react?deps=react@19";
       import { clsx } from "clsx";
       import { twMerge } from "tailwind-merge";
@@ -241,7 +242,9 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
             { type: "title", text: "1. Values That Shape Your Home" },
             { type: "checkboxes", label: "Which values do you want your home to embody?", options: ["Peace & rest", "Hospitality & welcome", "Creativity", "Simplicity", "Family connection", "Stewardship", "Joy & play", "Beauty & order"] },
             { type: "title", text: "2. Function & Flow" },
-            { type: "checkboxes", label: "Features to help you age gracefully and live purposefully:", options: ["One-level living", "Wide doorways", "Barrier-free shower", "Outdoor living areas", "Gear storage", "Proximity to family"] }
+            { type: "checkboxes", label: "Features to help you age gracefully and live purposefully:", options: ["One-level living", "Wide doorways", "Barrier-free shower", "Outdoor living areas", "Gear storage", "Proximity to family"] },
+            { type: "title", text: "3. Legacy Touchpoints" },
+            { type: "textarea", label: "What items hold deep meaning and deserve intentional placement?" }
           ]
         },
         {
@@ -357,7 +360,7 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
                 </div>
               </div>
             </section>
-            <CommunityDemo />
+            <CommunityRedditStyle />
             <AuthorSection />
           </motion.div>
         );
@@ -390,9 +393,9 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
 
       function Hero() {
         return (
-          <section className="relative h-screen flex items-start justify-center overflow-hidden pt-[10vh]">
+          <section className="relative h-screen flex items-start justify-center overflow-hidden pt-[12vh]">
             <motion.div initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 2.5 }} className="absolute inset-0 z-0">
-              <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover opacity-90" alt="Mountain background" />
+              <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover opacity-90" alt="Mountain" />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#E8EDF3]" />
             </motion.div>
             <div className="relative z-10 text-center px-4 max-w-5xl">
@@ -405,7 +408,7 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
                   The empty nest isn’t an ending—it’s an opening. A sacred opportunity where new dreams are built and legacy takes root.
                 </p>
                 <div className="flex gap-4 justify-center">
-                  <a href="#book" className="px-10 py-5 bg-basecamp-stone text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-2xl hover:bg-basecamp-accent hover:scale-105 active:scale-95 transition-all">Explore the Guide</a>
+                  <a href="#book" className="px-10 py-5 bg-basecamp-stone text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-2xl hover:bg-basecamp-accent hover:scale-105 transition-all outline-none">Explore the Guide</a>
                 </div>
               </motion.div>
             </div>
@@ -485,9 +488,9 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
                     {sec.type === "checkboxes" && (
                       <div className="space-y-6 text-left">
                          {sec.label && <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 block">{sec.label}</label>}
-                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 checkbox-container">
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                            {sec.options.map(opt => (
-                             <label key={opt} className="checkbox-item flex items-center gap-4 p-6 bg-basecamp-sky/5 rounded-2xl cursor-pointer border border-transparent hover:border-basecamp-accent/20 transition-all">
+                             <label key={opt} className="flex items-center gap-4 p-6 bg-basecamp-sky/5 rounded-2xl cursor-pointer border border-transparent hover:border-basecamp-accent/20 transition-all">
                                <input type="checkbox" className="w-5 h-5 rounded-md" /> 
                                <span className="text-base text-basecamp-stone font-medium ml-4">{opt}</span>
                              </label>
@@ -521,68 +524,83 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
         );
       }
 
-      function CommunityDemo() {
-        const [comments, setComments] = useState([]);
-        const [commentInput, setCommentInput] = useState("");
+      function CommunityRedditStyle() {
+        const [activeThread, setActiveThread] = useState({
+          id: 1,
+          title: "Establish Your First Base Camp Reflection",
+          author: "Justin Schmitt",
+          photo: JUSTIN_PHOTO,
+          content: "Welcome to the Base Camp forum. This is a dedicated space for parents navigating the transition beyond the empty nest. Start a conversation or share a reflection below.",
+          date: "Now",
+          replies: []
+        });
 
-        const handleAddComment = (e) => {
-          e.preventDefault();
-          if (!commentInput.trim()) return;
-          setComments([...comments, { id: Date.now(), content: commentInput, date: "Just now" }]);
-          setCommentInput("");
-        };
+        const MOCK_FORUM_THREADS = [
+          { id: 1, title: "Handling the First Holiday Alone", author: "Sarah M.", photo: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=100", content: "The transition from a full house at Thanksgiving to a quiet one was tougher than I thought. How are you all redefining those traditions?", date: "1d ago", repliesCount: 0 },
+          { id: 2, title: "Mentoring the Next Generation", author: "David L.", photo: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=100", content: "I've started meeting with two young professionals at my church. It's amazing how much they value a safe space to ask hard questions.", date: "2d ago", repliesCount: 0 },
+          { id: 3, title: "Building in the Mountains", author: "Justin Schmitt", photo: JUSTIN_PHOTO, content: "We finally found our land in Durango. The process was long but seeing the alpenglow on the cliffs makes every delay worth it. What are your must-haves for a mountain home?", date: "3d ago", repliesCount: 0 }
+        ];
 
         return (
           <section id="community" className="py-32 px-8 bg-white no-print">
-            <div className="max-w-6xl mx-auto text-left">
+            <div className="max-w-6xl mx-auto">
                <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8 text-left">
-                  <div className="text-left">
-                    <span className="text-basecamp-accent font-bold text-[10px] uppercase tracking-widest block mb-4">The Base Camp Forum</span>
-                    <h2 className="text-6xl md:text-7xl font-serif text-basecamp-stone text-left leading-none">Community <span className="italic font-light text-basecamp-forest">Threads</span></h2>
+                  <div className="max-w-2xl text-left">
+                    <span className="text-basecamp-accent font-bold text-[10px] uppercase tracking-[0.4em] block mb-4">The Base Camp Summit</span>
+                    <h2 className="text-6xl md:text-7xl font-serif text-basecamp-stone leading-none tracking-tighter text-left">Community <span className="italic font-light text-basecamp-forest">Threads</span></h2>
                   </div>
                </div>
-               
-               <div className="bg-basecamp-sky/20 rounded-[3rem] p-8 md:p-12 border border-black/5 flex flex-col justify-between min-h-[400px] max-w-4xl mx-auto text-left shadow-sm">
-                  <div className="space-y-12 text-left">
-                     <div className="text-left space-y-4">
-                        <h3 className="text-3xl font-serif text-basecamp-stone text-left">Start the Conversation</h3>
-                        <p className="text-basecamp-earth font-light leading-relaxed text-left">No reflections have been shared yet. Be the first to establish a trail marker for others.</p>
-                     </div>
 
-                     <div className="space-y-8 text-left">
-                        <h4 className="text-[10px] font-bold uppercase tracking-widest text-basecamp-forest border-b border-black/5 pb-4 text-left">Responses</h4>
-                        {comments.length === 0 ? (
-                          <div className="flex flex-col items-center py-10 opacity-20 text-center">
-                             <MessageSquare className="w-12 h-12 mb-4" />
-                             <p className="text-sm italic">Waiting for the first response...</p>
-                          </div>
-                        ) : (
-                          <div className="space-y-6 text-left">
-                            {comments.map(c => (
-                              <div key={c.id} className="flex gap-4 text-left items-start">
-                                 <div className="w-8 h-8 rounded-lg bg-basecamp-stone text-white flex items-center justify-center text-xs font-bold uppercase flex-shrink-0">U</div>
-                                 <div>
-                                    <p className="text-xs font-bold text-basecamp-stone mb-1">Guest User <span className="font-normal opacity-40 ml-2">{c.date}</span></p>
-                                    <p className="text-sm font-light text-basecamp-earth leading-relaxed">{c.content}</p>
-                                 </div>
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                     </div>
+               <div className="grid lg:grid-cols-[320px_1fr] gap-12 text-left">
+                  <div className="space-y-6 text-left">
+                    <h4 className="text-[10px] font-bold uppercase tracking-widest text-basecamp-forest text-left">Active Reflections</h4>
+                    <div className="space-y-3">
+                       {MOCK_FORUM_THREADS.map(t => (
+                         <button 
+                           key={t.id} 
+                           onClick={() => setActiveThread({ ...t, replies: [] })}
+                           className={cn(
+                             "w-full text-left p-6 rounded-2xl border transition-all text-sm group",
+                             activeThread.id === t.id ? "bg-basecamp-stone text-white border-transparent shadow-lg" : "bg-basecamp-sky/20 border-black/5 hover:bg-white"
+                           )}
+                         >
+                            <span className="block text-[10px] opacity-40 mb-2 group-hover:opacity-60 transition-opacity uppercase tracking-widest">Posted by {t.author}</span>
+                            <span className="font-serif text-base block leading-snug">{t.title}</span>
+                            <span className="inline-flex items-center gap-1 mt-3 text-[10px] font-bold uppercase tracking-widest opacity-30"><MessageSquare className="w-3 h-3" /> {t.repliesCount} Responses</span>
+                         </button>
+                       ))}
+                    </div>
                   </div>
 
-                  <form onSubmit={handleAddComment} className="mt-12 relative group text-left">
-                     <input 
-                       value={commentInput}
-                       onChange={(e) => setCommentInput(e.target.value)}
-                       placeholder="Share your thoughts..." 
-                       className="w-full bg-white border border-black/10 rounded-2xl px-6 py-4 pr-16 text-sm focus:border-basecamp-accent outline-none transition-all shadow-sm group-hover:shadow-md text-basecamp-stone" 
-                     />
-                     <button type="submit" className="absolute right-2 top-2 bottom-2 aspect-square bg-basecamp-stone text-white rounded-xl flex items-center justify-center hover:bg-basecamp-accent transition-colors">
-                        <Send className="w-4 h-4" />
-                     </button>
-                  </form>
+                  <div className="bg-basecamp-sky/20 rounded-[3rem] p-10 md:p-16 border border-black/5 flex flex-col min-h-[400px] text-left relative overflow-hidden max-w-4xl mx-auto">
+                    <AnimatePresence mode="wait">
+                       <motion.div key={activeThread.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-left w-full h-full">
+                          <div className="flex items-center gap-4 mb-8 text-left">
+                             <img src={activeThread.photo} className="w-14 h-14 rounded-2xl bg-basecamp-accent object-cover shadow-md border-2 border-white" alt={activeThread.author} referrerPolicy="no-referrer" />
+                             <div>
+                                <h3 className="text-base font-bold text-basecamp-stone uppercase tracking-widest">{activeThread.author}</h3>
+                                <p className="text-[10px] opacity-40 uppercase tracking-widest">{activeThread.date} • Shared at Base Camp</p>
+                             </div>
+                          </div>
+                          
+                          <h2 className="text-4xl md:text-5xl font-serif text-basecamp-stone mb-8 leading-tight text-left">{activeThread.title}</h2>
+                          <p className="text-xl font-light text-basecamp-earth whitespace-pre-wrap leading-relaxed mb-12 text-left">{activeThread.content}</p>
+                          
+                          <div className="pt-12 border-t border-black/10 text-left">
+                             <h4 className="text-[10px] font-bold uppercase tracking-widest text-basecamp-forest mb-8">Responses From The Trail</h4>
+                             <p className="text-sm italic opacity-40 font-light mb-8">No responses to this reflection yet. Be the first to share your wisdom.</p>
+                             
+                             <div className="mt-8 bg-white rounded-3xl p-8 border border-black/5 shadow-sm text-left">
+                                <p className="text-xs font-bold text-basecamp-stone mb-4 opacity-40 uppercase">Post your own reflection</p>
+                                <textarea className="w-full bg-basecamp-sky/30 rounded-2xl p-6 text-sm outline-none focus:ring-2 ring-basecamp-forest/20 resize-none min-h-[120px] text-basecamp-stone" placeholder="Share your experience with the community..."></textarea>
+                                <div className="flex justify-end mt-4">
+                                   <button className="px-10 py-4 bg-basecamp-stone text-white rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-basecamp-forest transition-all shadow-lg active:scale-95 outline-none font-sans">Publish Reflection</button>
+                                </div>
+                             </div>
+                          </div>
+                       </motion.div>
+                    </AnimatePresence>
+                  </div>
                </div>
             </div>
           </section>
