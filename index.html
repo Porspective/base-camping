@@ -27,6 +27,7 @@
                 earth: "#4C4B40",
                 sky: "#E8EDF3",
                 accent: "#D4A373",
+                forest: "#1B4332",
               },
             },
           },
@@ -80,25 +81,41 @@
 
     <!-- React and Babel -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@19",
+        "react-dom": "https://esm.sh/react-dom@19",
+        "react-dom/client": "https://esm.sh/react-dom@19/client",
+        "motion/react": "https://esm.sh/motion/react",
+        "lucide-react": "https://esm.sh/lucide-react",
+        "clsx": "https://esm.sh/clsx",
+        "tailwind-merge": "https://esm.sh/tailwind-merge"
+      }
+    }
+    </script>
   </head>
   <body>
     <div id="root"></div>
 
     <script type="text/babel" data-type="module">
-      import React, { useState, useEffect, useCallback, StrictMode } from "https://esm.sh/react@19";
-      import { createRoot } from "https://esm.sh/react-dom@19/client";
-      import { motion, AnimatePresence } from "https://esm.sh/motion/react?deps=react@19";
+      import React, { useState, useEffect, useCallback, StrictMode } from "react";
+      import { createRoot } from "react-dom/client";
+      import { motion, AnimatePresence } from "motion/react";
       import { 
         Mountain, Tent, Map as MapIcon, Compass, BookOpen, 
         User, ChevronRight, ArrowRight, MessageSquare, 
-        Send, LogIn, Plus, X, ArrowLeft, Star, ClipboardList, PenTool, Flame, Heart, Printer, CheckSquare,
-        Coffee, Target, Wind, Home as HomeIcon, Zap, Award, Recycle, Sunrise, GraduationCap
+        Send, LogIn, Plus, X, ArrowLeft, Star, ClipboardList, PenTool, Flame, Heart, Printer,
+        ArrowBigUp, ArrowBigDown, Share2, MoreHorizontal
       } from "https://esm.sh/lucide-react?deps=react@19";
-      import { clsx } from "https://esm.sh/clsx";
-      import { twMerge } from "https://esm.sh/tailwind-merge";
+      import { clsx } from "clsx";
+      import { twMerge } from "tailwind-merge";
 
-      // Utility for Tailwind class merging
       const cn = (...inputs) => twMerge(clsx(inputs));
+
+      const JUSTIN_PHOTO = "https://scontent-den2-1.xx.fbcdn.net/v/t39.30808-6/585056595_10235399949716675_8801284874818327176_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=101&ccb=1-7&_nc_sid=53a332&_nc_ohc=p9KysskaON4Q7kNvwEt1RVf&_nc_oc=Adoj5wr924SkDZPY8DF6biWcSRYZaCxeFkJ1xJAw1o2QOa6WVzY3AlDv8AdUPo_a3Vo&_nc_zt=23&_nc_ht=scontent-den2-1.xx&_nc_gid=vecEd-nXIEhbKpNObMRa5A&_nc_ss=8&oh=00_Afz0JMuHzTwC1hhYd6upUQyVRjOcttrNdGZPNrEAYZ89mg&oe=69C160B4";
+      const METAPHOR_PHOTO = "https://scontent-den2-1.xx.fbcdn.net/v/t39.30808-6/505441402_10232767610029828_7191845792755838213_n.jpg?stp=cp6_dst-jpg_tt6&_nc_cat=102&ccb=1-7&_nc_sid=53a332&_nc_ohc=8toJCiOgb1gQ7kNvwG-o07C&_nc_oc=AdpG6mZAeq8l4TfuAK8QYrBjcQqY41UIhETaaZeQDdOagmJnX5CMzORHI9PDNuHzViU&_nc_zt=23&_nc_ht=scontent-den2-1.xx&_nc_gid=yd4JDdDzIErO4ItM32L_8w&_nc_ss=8&oh=00_AfzWR4It-4XFgWnr-8l4qaQ5tNpLIMdhibIL1_2tZA40Dg&oe=69C15C45";
 
       const CHAPTERS = [
         {
@@ -129,30 +146,13 @@ In this metaphor, our children are the climbers. They will ascend their own moun
           quote: "“See, I am doing a new thing! Now it springs up; do you not perceive it? I am making a way in the wilderness and streams in the wasteland.” - Isaiah 43:19",
           content: `The term “nest” traditionally conjures up images of comfort and coziness. It’s where the young are nurtured until they’re ready to fly. But here’s the thing: a nest stays essentially the same. A static space.
 
+What if the nest could be reimagined? What if the twigs and threads of your home, faith, and relationships don’t fall apart when the kids leave - what if they get rewoven into something more expansive? 
+
 ### Reimagining the Nest
 
-What if the twigs and threads of your home, faith, and relationships don’t fall apart when the kids leave - what if they get rewoven into something more expansive? Maybe the nest becomes a truly new thing: a place for connection, creativity, rest, and renewal. Maybe it’s God gently creating space for what’s next. 
+Maybe the nest becomes a truly new thing: a place for connection, creativity, rest, and renewal. Maybe it’s God gently creating space for what’s next. 
 
-The base camp mindset begins right here - in the shift from seeing yourself as someone left behind to seeing yourself as someone well-positioned for what God has ahead.
-
-The base camp mindset reshapes three core areas of life in this season: How we lead, how we delight, and how we care for what God has entrusted to us.
-• Leadership becomes quieter but more personal.
-• Joy becomes deeper and less rushed.
-• And stewardship extends even to our bodies, which carry us into whatever God has next.
-
-### The Evolution of the Base Camper
-
-When mountaineers set out to summit a peak, they don’t start at base camp. They’ve already climbed a good distance before ever reaching it. And when they arrive, they find a place of rest, preparation, and support.
-
-You’ve already weathered your own climb: the sleepless nights, scraped knees, science projects that started at 10 p.m., the first days of school, the driving lessons, and the nerve-wracking launch into young adulthood. 
-
-But as our children step into adulthood, what they need - and what you need - begins to shift. They no longer require constant supervision, but they still need our presence and engagement, even in the mundane moments. Emotional support now moves at a digital rhythm: quick texts, Instagram reels, FaceTime calls, and the occasional, “Call me immediately” message that stops your heart for half a second.
-
-### Physical Stewardship of Base Camp
-
-“Do you not know that your bodies are temples of the Holy Spirit, who is in you, whom you have received from God? You are not your own; you were bought at a price. Therefore honor God with your bodies.” - 1 Corinthians 6:19-20 
-
-Physical fitness isn’t vanity. It’s stewardship. When I began training to become a ski instructor, I quickly learned that loving the mountains wasn’t enough - I had to prepare my body to serve on them. Training stopped feeling like obligation and started feeling like gratitude in motion. Every mile walked, every rep completed, every game played with friends becomes a prayer of gratitude.`
+The base camp mindset begins right here - in the shift from seeing yourself as someone left behind to seeing yourself as someone well-positioned for what God has ahead.`
         },
         {
           id: 3,
@@ -160,46 +160,27 @@ Physical fitness isn’t vanity. It’s stewardship. When I began training to be
           quote: "“I lift up my eyes to the mountains - where does my help come from? My help comes from the Lord, the Maker of heaven and earth.” - Psalm 121:1-2",
           content: `The transition to base camping isn’t just about building a home - although that may be part of your dream. It’s about building a new phase of life. And every new phase needs a vision. 
 
-Before you establish your base camp, you have to lift your eyes and consider what mountain stands before you now. This chapter is about asking the deeper questions that stir your heart and guide your next steps. 
+Before you establish your base camp, you have to lift your eyes and consider what mountain stands before you now. 
 
 ### A New Trailhead
 
-Proverbs 16:3 tells us, “Commit to the Lord whatever you do, and He will establish your plans.”
-
-In mountaineering, climbers don’t just wander into the wilderness hoping to bump into a summit. They study maps, assess risks, and chart their course with intention. They begin at a trailhead - aware that what lies ahead will require preparation, humility, and trust.
-
-### The Adventure of Travel
-
-For many, adventure means stepping beyond the familiar. Travel - especially international travel - can become a powerful companion in this season. Not the rushed, check-the-box kind that sends you home exhausted, but the kind that actually expands you.
-• Witness new cultures up close. Stand inside a centuries-old cathedral.
-• Form new rituals. Annual father-daughter expeditions or mother-son hikes.
-• Taste the world with courage. Honor another culture through its food.
-
-### Refine Your Vision
-
-Create a physical or digital vision map - a living, evolving document that gives shape to the calling God is stirring in you. Digital vision maps can be dynamic canvases: photos, scripture, and notes gathered in one place. Co-designing a dream with your spouse doesn’t just chart a destination - it strengthens the bond between you. 
-
-Wherever you find yourself - surrounded by people or walking quietly alone, thriving or enduring - your mountain is still worth climbing. Commit what you can today, and trust that God will establish the path.`
+Proverbs 16:3 tells us, “Commit to the Lord whatever you do, and He will establish your plans.” In mountaineering, climbers don’t just wander into the wilderness hoping to bump into a summit. They study maps, assess risks, and chart their course with intention.`
         },
         {
           id: 4,
           title: "Finding Your Land",
-          quote: "“The Lord had said to Abram, ‘Go from your country, your people and your father’s household to the land I will show you.’” - Genesis 12:1",
-          content: `Every base camp begins with a location. Before you can build a home that nourishes your soul and supports your family’s future, you must find the land that will hold it. This chapter explores the spiritual and practical journey of choosing where to plant your next roots.
+          quote: "“The Lord had said to Abram, ‘Go from your country... to the land I will show you.’” - Genesis 12:1",
+          content: `Every base camp begins with a location. Finding your land isn’t about chasing a perfect location - it’s about discerning where obedience, peace, and purpose intersect.
 
 ### Honor your Current Base Camp
 
-“Nevertheless, each person should live as a believer in whatever situation the Lord has assigned to them.” - 1 Corinthians 7:17
-
-There’s nothing wrong with staying right where you are. A well-rooted base camp can be a powerful place of ministry and peace. Staying put allows you to deepen established relationships and continue cultivating spiritual soil. But staying put doesn’t mean staying the same.
+There’s nothing wrong with staying right where you are. A well-rooted base camp can be a powerful place of ministry and peace. Staying put allows you to deepen established relationships and continue cultivating spiritual soil. 
 
 ### The Spiritual Significance of Land
 
-God called Abram to leave the comfort of the familiar and journey toward a new land - a place that would become the foundation of a legacy. The Israelites wandered for generations in search of the Promised Land, learning faith and endurance along the way. Land, then, is sacred. It’s the setting for divine encounters and human flourishing.
+Land is inseparable from promise, purpose, and identity. Deuteronomy 8:7-10 says, “For the Lord your God is bringing you into a good land - a land with brooks, streams, and deep springs...” 
 
-### Colorado as a Case Study
-
-For me, the mountains of Durango, Colorado, have always held a sacred place in my story. It’s where I grew up, where I first learned to recognize God’s handiwork in creation. Returning as an adult, the familiar ridgelines carried new meaning. Up in the high-alpine air, peaks rise like cathedrals, and aspens tremble like congregations in worship. Returning to Durango allowed me to rediscover home as a base camp for the life God was inviting us into next.`
+For me, the mountains of Durango, Colorado, have always held a sacred place in my story. Returning home was not just geographical, but spiritual. Up in the high-alpine air, peaks rise like cathedrals, and aspens tremble like congregations in worship.`
         }
       ];
 
@@ -212,8 +193,7 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
             { type: "input", label: "Emotion 1" }, { type: "input", label: "Emotion 2" }, { type: "input", label: "Emotion 3" },
             { type: "textarea", label: "What do these emotions tell you about what you’re leaving and what you’re stepping toward? (3-5 sentences)" },
             { type: "title", text: "2. Mapping Your Role as a Base Camper" },
-            { type: "textarea", label: "Think about each of your children individually. How can you be a steady, supportive presence while letting them climb their own mountain?" },
-            { type: "textarea", label: "What support do they most need? What support don’t they need?" },
+            { type: "textarea", label: "How can you be a steady, supportive presence while letting your children climb their own mountain? What support do they most need? What support don’t they need?" },
             { type: "title", text: "3. Your Home as a Spiritual Base Camp" },
             { type: "checkboxes", label: "Audit: What aspects of your spiritual life, emotional rhythms, or physical environment need fresh attention?", options: ["Prayer rhythm", "Marriage / relationships", "Physical health", "Hospitality", "Daily rest", "Creative pursuits", "Home atmosphere"] },
             { type: "title", text: "4. Your Personalized 'Gear Check'" },
@@ -228,24 +208,21 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
           sections: [
             { type: "title", text: "1. Your Base Camp Today" },
             { type: "textarea", label: "Describe your current “camp condition”: Prepared and steady, or missing a center pole?" },
-            { type: "input", label: "Three words that capture this season for you" },
             { type: "title", text: "2. Leading Without the Spotlight" },
             { type: "checkboxes", label: "Where might God be inviting you to lead in a new way?", options: ["Mentoring others", "Coaching/Volunteering with youth", "Starting a small business", "Supporting nonprofits", "Hospitality base camp"] },
             { type: "title", text: "3. Your Storm-Shelter Plan" },
-            { type: "textarea", label: "What makes you feel grounded in a storm? Who might God bring to your camp for shelter?" },
-            { type: "title", text: "4. Base Camp Physicality" },
-            { type: "checkboxes", label: "Check any that feel life-giving:", options: ["Strength training", "Hiking / Walking", "Cycling", "Swimming / Kayaking", "Yoga / Meditation", "Recreation with grandkids"] }
+            { type: "textarea", label: "What makes you feel grounded and steady in a storm? Who might God bring to your camp for shelter?" }
           ]
         },
         {
           id: 3, title: "Mapping Your Mountain",
           sections: [
             { type: "title", text: "1. Clarify Your Mountain" },
-            { type: "textarea", label: "What mountain do you sense God calling you to climb? Personal, spiritual, creative, or lifestyle shift?" },
+            { type: "textarea", label: "What mountain do you sense God calling you to climb? Describe it in a few sentences." },
             { type: "title", text: "2. Create Your Vision Map" },
-            { type: "textarea", label: "List at least five key elements—images, words, prayers, dreams, projects, or anchor Scriptures." },
+            { type: "textarea", label: "List at least five key elements—images, words, prayers, dreams, or projects." },
             { type: "title", text: "3. Take the First Step" },
-            { type: "input", label: "What is one specific, practical step you can take in the next 30 days?" }
+            { type: "input", label: "What is one practical step you can take in the next 30 days?" }
           ]
         },
         {
@@ -262,11 +239,9 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
           id: 5, title: "Designing Your Dream",
           sections: [
             { type: "title", text: "1. Values That Shape Your Home" },
-            { type: "checkboxes", label: "Which values do you want your home to embody?", options: ["Peace & rest", "Hospitality", "Creativity", "Simplicity", "Family connection", "Stewardship", "Joy & play", "Beauty & order"] },
+            { type: "checkboxes", label: "Which values do you want your home to embody?", options: ["Peace & rest", "Hospitality & welcome", "Creativity", "Simplicity", "Family connection", "Stewardship", "Joy & play", "Beauty & order"] },
             { type: "title", text: "2. Function & Flow" },
-            { type: "checkboxes", label: "Features to help you age gracefully and live purposefully:", options: ["One-level living", "Wide doorways", "Barrier-free shower", "Outdoor living areas", "Gear storage", "Proximity to family"] },
-            { type: "title", text: "3. Legacy Touchpoints" },
-            { type: "textarea", label: "What items hold deep meaning and deserve intentional placement?" }
+            { type: "checkboxes", label: "Features to help you age gracefully and live purposefully:", options: ["One-level living", "Wide doorways", "Barrier-free shower", "Outdoor living areas", "Gear storage", "Proximity to family"] }
           ]
         },
         {
@@ -274,10 +249,8 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
           sections: [
             { type: "title", text: "1. Inviting God Into the Build" },
             { type: "textarea", label: "Write a brief prayer for wisdom, patience, or peace during the build." },
-            { type: "title", text: "2. Priorities & Boundaries" },
-            { type: "textarea", label: "What are your top 5 primary priorities for this build? What can you release?" },
-            { type: "title", text: "3. The Story Your Home Will Tell" },
-            { type: "textarea", label: "When someone walks through your home, what do you hope they feel? What story does it tell about your faith?" }
+            { type: "title", text: "2. Celebrating Milestones" },
+            { type: "checkboxes", label: "Which moments deserve a specific celebration?", options: ["First walk-through", "Groundbreaking", "Foundation poured", "Framing complete", "Electricity live", "Move-in day"] }
           ]
         },
         {
@@ -286,10 +259,7 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
             { type: "title", text: "1. Redefining Retirement" },
             { type: "checkboxes", label: "When you picture retirement, what do you most long for?", options: ["More rest", "More service", "More creativity", "More travel", "More family time", "Deeper spiritual rhythms"] },
             { type: "title", text: "2. Crafting Your Vision Statement" },
-            { type: "text", text: "Formula: In this season, I will ________ , so that ________ , and reflect Christ by ________ ." },
-            { type: "textarea", label: "My Vision Statement" },
-            { type: "title", text: "3. Relational Prep" },
-            { type: "input", label: "One relational habit will help me stay grounded (e.g. weekly coffee)" }
+            { type: "textarea", label: "In this season, I will ________, so that ________, and reflect Christ by ________." }
           ]
         },
         {
@@ -297,16 +267,15 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
           sections: [
             { type: "title", text: "1. Gifts from the Climb" },
             { type: "textarea", label: "What strengths, quirks, skills, or hard-earned lessons could God use to bless others? Name one person who might need this perspective." },
-            { type: "title", text: "2. Create a Base Camp Vibe" },
-            { type: "input", label: "Words that describe the atmosphere I want to create" },
-            { type: "input", label: "One gathering I could initiate this month" }
+            { type: "title", text: "2. Relational Step" },
+            { type: "input", label: "One specific way you will bless or encourage someone this month" }
           ]
         },
         {
           id: 9, title: "Living in Rhythm",
           sections: [
             { type: "title", text: "1. Daily Rhythms Inventory" },
-            { type: "textarea", label: "Life-giving rhythms vs. life-draining habits" },
+            { type: "textarea", label: "List your Life-Giving rhythms versus your Life-Draining habits." },
             { type: "title", text: "2. Sabbath Practice" },
             { type: "textarea", label: "Three things I will not do on Sabbath" },
             { type: "checkboxes", label: "What does rest look like for me right now?", options: ["Unhurried worship", "A good meal", "Reading", "Time outside", "No phone", "Conversation"] }
@@ -362,20 +331,19 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
             <Hero />
             <MetaphorSection />
             <QuoteSection />
-            
             <section id="book" className="py-32 px-8 bg-[#E8EDF3]">
-              <div className="max-w-7xl mx-auto">
-                <span className="text-basecamp-accent font-bold text-[10px] tracking-[0.4em] uppercase mb-4 block">The Guidebook</span>
-                <h2 className="text-5xl md:text-7xl font-serif mb-20 tracking-tighter text-basecamp-stone">Inside the <span className="italic font-light opacity-50">Pages</span></h2>
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="max-w-7xl mx-auto text-center">
+                <span className="text-basecamp-accent font-bold text-[10px] tracking-[0.4em] uppercase mb-4 block text-center">The Guidebook</span>
+                <h2 className="text-5xl md:text-7xl font-serif mb-20 tracking-tighter text-basecamp-stone text-center">Inside the <span className="italic font-light text-basecamp-forest">Pages</span></h2>
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 text-left">
                   {CHAPTERS.map(ch => (
                     <div key={ch.id} className="p-10 bg-white/50 backdrop-blur-sm rounded-[2.5rem] border border-black/5 flex flex-col justify-between hover:bg-white hover:shadow-xl transition-all group h-full">
                       <div>
-                        <div className="w-12 h-12 rounded-2xl bg-basecamp-stone text-white flex items-center justify-center mb-8 group-hover:bg-basecamp-accent transition-colors shadow-lg shadow-black/5"><BookOpen className="w-5 h-5" /></div>
+                        <div className="w-12 h-12 rounded-2xl bg-basecamp-stone text-white flex items-center justify-center mb-8 group-hover:bg-basecamp-accent transition-colors shadow-lg"><BookOpen className="w-5 h-5" /></div>
                         <h3 className="text-2xl mb-4 font-serif text-basecamp-stone">{ch.title}</h3>
-                        <p className="text-sm opacity-60 line-clamp-3 mb-8 text-basecamp-stone">{ch.quote}</p>
+                        <p className="text-sm opacity-60 line-clamp-3 mb-8 text-basecamp-stone leading-relaxed">{ch.quote}</p>
                       </div>
-                      <button onClick={() => onRead(ch.id)} className="flex items-center gap-2 text-[10px] uppercase font-bold text-basecamp-accent group/btn tracking-widest">
+                      <button onClick={() => onRead(ch.id)} className="flex items-center gap-2 text-[10px] uppercase font-bold text-basecamp-accent group/btn tracking-widest outline-none">
                         Read Chapter <ArrowRight className="w-3 h-3 transition-transform group-hover/btn:translate-x-1" />
                       </button>
                     </div>
@@ -383,7 +351,7 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
                 </div>
               </div>
             </section>
-
+            <CommunityRedditStyle />
             <AuthorSection />
           </motion.div>
         );
@@ -401,14 +369,14 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
           <motion.nav initial={{ y: -100 }} animate={{ y: 0 }} className={cn("fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-12 py-6 transition-all duration-500 no-print", isScrolled ? "bg-white/80 backdrop-blur-md py-4 shadow-sm" : "bg-transparent")}>
             <button onClick={onHome} className="flex items-center gap-2 group outline-none">
               <Mountain className="w-6 h-6 text-basecamp-accent" />
-              <span className="text-sm font-bold tracking-widest uppercase text-basecamp-stone">Base Camping</span>
+              <span className="text-sm font-bold tracking-widest uppercase text-basecamp-stone font-sans">Base Camping</span>
             </button>
-            <div className="hidden md:flex items-center gap-8 text-[10px] font-bold tracking-widest uppercase text-basecamp-stone">
-              <button onClick={() => onSection('book')} className="hover:text-basecamp-accent">The Guide</button>
-              <button onClick={onWorksheets} className="hover:text-basecamp-accent">Worksheets</button>
-              <button onClick={() => onSection('community')} className="hover:text-basecamp-accent">Community</button>
-              <button onClick={() => onSection('author')} className="hover:text-basecamp-accent">The Author</button>
-              <a href="https://amazon.com" target="_blank" className="px-6 py-3 bg-basecamp-stone text-white rounded-full hover:bg-basecamp-accent transition-all shadow-lg shadow-black/10">Pre-Order</a>
+            <div className="hidden md:flex items-center gap-8 text-[10px] font-bold tracking-widest uppercase text-basecamp-stone font-sans">
+              <button onClick={() => onSection('book')} className="hover:text-basecamp-accent outline-none">The Guide</button>
+              <button onClick={onWorksheets} className="hover:text-basecamp-accent outline-none font-bold">Worksheets</button>
+              <button onClick={() => onSection('community')} className="hover:text-basecamp-accent outline-none">Community</button>
+              <button onClick={() => onSection('author')} className="hover:text-basecamp-accent outline-none">The Author</button>
+              <a href="https://amazon.com" target="_blank" className="px-6 py-3 bg-basecamp-stone text-white rounded-full hover:bg-basecamp-accent transition-all shadow-lg">Pre-Order</a>
             </div>
           </motion.nav>
         );
@@ -416,9 +384,9 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
 
       function Hero() {
         return (
-          <section className="relative h-screen flex items-start justify-center overflow-hidden pt-[12vh]">
+          <section className="relative h-screen flex items-start justify-center overflow-hidden pt-[15vh]">
             <motion.div initial={{ scale: 1.1 }} animate={{ scale: 1 }} transition={{ duration: 2.5 }} className="absolute inset-0 z-0">
-              <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover opacity-90" alt="Mountain background" />
+              <img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=2000" className="w-full h-full object-cover opacity-90" alt="Mountain" />
               <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#E8EDF3]" />
             </motion.div>
             <div className="relative z-10 text-center px-4 max-w-5xl">
@@ -431,7 +399,7 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
                   The empty nest isn’t an ending—it’s an opening. A sacred opportunity where new dreams are built and legacy takes root.
                 </p>
                 <div className="flex gap-4 justify-center">
-                  <a href="#book" className="px-10 py-5 bg-basecamp-stone text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-2xl hover:bg-basecamp-accent hover:scale-105 transition-all">Explore the Guide</a>
+                  <a href="#book" className="px-10 py-5 bg-basecamp-stone text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-2xl hover:bg-basecamp-accent hover:scale-105 active:scale-95 transition-all outline-none">Explore the Guide</a>
                 </div>
               </motion.div>
             </div>
@@ -451,8 +419,8 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
             <div className="max-w-7xl mx-auto">
               <div className="mb-20 text-center max-w-3xl mx-auto">
                 <span className="text-basecamp-accent font-bold text-[10px] tracking-[0.4em] uppercase mb-4 block">Personal Growth Tools</span>
-                <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-tighter text-basecamp-stone text-basecamp-stone">Tools for the <span className="italic font-light opacity-50">Trail</span></h1>
-                <p className="text-lg text-basecamp-earth font-light leading-relaxed">Interactive planning sheets designed to help you process your ascent and establish your base camp intentionally. Click to open and print your reflections.</p>
+                <h1 className="text-5xl md:text-7xl font-serif mb-6 tracking-tighter text-basecamp-stone">Tools for the <span className="italic font-light opacity-50">Trail</span></h1>
+                <p className="text-lg text-basecamp-earth font-light leading-relaxed">Interactive planning sheets designed to help you process your ascent and establish your base camp intentionally.</p>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
                 {WORKSHEETS.map(ws => (
@@ -475,23 +443,13 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
 
       function WorksheetDetail({ ws, onBack }) {
         if (!ws) return null;
-        
-        const handlePrint = () => {
-          window.print();
-        };
-
         return (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="pt-32 pb-20 px-6 max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-12 no-print">
-              <button onClick={onBack} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-basecamp-accent group outline-none">
-                <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Back to Gallery
-              </button>
-              <button onClick={handlePrint} className="flex items-center gap-2 px-8 py-4 bg-basecamp-stone text-white rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-basecamp-accent transition-all shadow-xl hover:scale-105 active:scale-95">
-                <Printer className="w-4 h-4" /> Print this Worksheet
-              </button>
+              <button onClick={onBack} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-basecamp-accent group outline-none"><ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Back to Gallery</button>
+              <button onClick={() => window.print()} className="flex items-center gap-2 px-8 py-4 bg-basecamp-stone text-white rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-basecamp-accent transition-all shadow-xl active:scale-95 outline-none font-sans"><Printer className="w-4 h-4" /> Print this Worksheet</button>
             </div>
-
-            <div className="bg-white rounded-[3rem] p-12 md:p-20 shadow-2xl border border-black/5 printable-content">
+            <div className="bg-white rounded-[3rem] p-12 md:p-20 shadow-2xl border border-black/5 printable-content text-left">
               <div className="flex items-start justify-between mb-16">
                  <div className="space-y-4">
                     <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-basecamp-accent block">Reflection + Planning</span>
@@ -501,55 +459,38 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
                     <PenTool className="w-10 h-10 text-basecamp-stone opacity-20" />
                  </div>
               </div>
-
               <div className="space-y-16">
                 {ws.sections.map((sec, i) => (
                   <div key={i} className="space-y-6">
-                    {sec.type === "title" && (
-                      <h3 className="text-2xl font-bold uppercase tracking-[0.2em] pt-10 border-t border-black/5 text-basecamp-stone">
-                        {sec.text}
-                      </h3>
-                    )}
+                    {sec.type === "title" && <h3 className="text-2xl font-bold uppercase tracking-[0.2em] pt-10 border-t border-black/5 text-basecamp-stone">{sec.text}</h3>}
                     {sec.type === "text" && <p className="text-basecamp-earth italic font-light text-lg">{sec.text}</p>}
                     {sec.type === "input" && (
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">{sec.label}</label>
-                        <input className="w-full bg-basecamp-sky/10 border-b-2 border-black/10 p-5 focus:border-basecamp-accent outline-none text-basecamp-stone transition-colors font-light text-lg" placeholder="Type here..." />
+                      <div className="space-y-2 text-left">
+                        <label className="text-[10px] font-bold uppercase opacity-40 tracking-widest">{sec.label}</label>
+                        <input className="w-full bg-basecamp-sky/10 border-b-2 border-black/10 p-5 focus:border-basecamp-accent outline-none text-basecamp-stone transition-colors" placeholder="Enter reflection..." />
                       </div>
                     )}
                     {sec.type === "textarea" && (
-                      <div className="space-y-3">
-                        <label className="text-[10px] font-bold uppercase tracking-widest opacity-40">{sec.label}</label>
+                      <div className="space-y-2 text-left">
+                        <label className="text-[10px] font-bold uppercase opacity-40 tracking-widest">{sec.label}</label>
                         <textarea rows={6} className="w-full bg-basecamp-sky/10 rounded-3xl p-8 focus:border-basecamp-accent outline-none border border-transparent text-basecamp-stone resize-none transition-all font-light text-lg leading-relaxed" placeholder="Share your thoughts..." />
                       </div>
                     )}
                     {sec.type === "checkboxes" && (
-                      <div className="space-y-6">
-                        {sec.label && <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 block">{sec.label}</label>}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 checkbox-container">
-                          {sec.options.map(opt => (
-                            <label key={opt} className="checkbox-item flex items-center gap-4 p-6 bg-basecamp-sky/5 rounded-2xl cursor-pointer hover:bg-white transition-all border border-transparent hover:border-basecamp-accent/20">
-                              <input type="checkbox" className="w-5 h-5 rounded-md" /> 
-                              <span className="text-base text-basecamp-stone font-medium leading-none">{opt}</span>
-                            </label>
-                          ))}
-                        </div>
+                      <div className="space-y-6 text-left">
+                         {sec.label && <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 block">{sec.label}</label>}
+                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                           {sec.options.map(opt => (
+                             <label key={opt} className="flex items-center gap-4 p-6 bg-basecamp-sky/5 rounded-2xl cursor-pointer border border-transparent hover:border-basecamp-accent/20 transition-all">
+                               <input type="checkbox" className="w-5 h-5 rounded-md" /> 
+                               <span className="text-base text-basecamp-stone font-medium ml-4">{opt}</span>
+                             </label>
+                           ))}
+                         </div>
                       </div>
                     )}
                   </div>
                 ))}
-              </div>
-
-              <div className="mt-24 pt-12 border-t border-black/5 flex flex-col items-center gap-8 no-print">
-                 <div className="text-center space-y-2">
-                    <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-basecamp-stone">Climb complete?</p>
-                    <p className="text-sm font-light opacity-40 italic">Print or save your notes before returning to the guide.</p>
-                 </div>
-                <button onClick={onBack} className="px-12 py-5 bg-basecamp-stone text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-xl hover:bg-basecamp-accent transition-all">Return to Ascent</button>
-              </div>
-              
-              <div className="hidden print-only mt-20 pt-12 border-t border-black/20 text-center opacity-30 text-[10px] uppercase font-bold tracking-[0.5em]">
-                 Base Camping — Building Purpose Beyond the Empty Nest
               </div>
             </div>
           </motion.div>
@@ -559,61 +500,95 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
       function ChapterView({ chapter, onBack }) {
         if (!chapter) return null;
         return (
-          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="pt-32 pb-20 px-6 max-w-4xl mx-auto min-h-screen">
-            <button onClick={onBack} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-basecamp-accent mb-12 group outline-none">
-              <ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Back to the Ascent
-            </button>
-            <div className="prose prose-lg max-w-none text-basecamp-stone">
-              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-basecamp-accent mb-4 block">Chapter 0{chapter.id}</span>
-              <h1 className="text-5xl md:text-8xl font-serif mb-10 leading-tight tracking-tighter drop-shadow-sm text-basecamp-stone">{chapter.title}</h1>
-              <blockquote className="text-2xl md:text-3xl italic border-l-4 border-basecamp-accent pl-10 py-4 mb-16 text-basecamp-earth leading-snug font-serif bg-basecamp-sky/20 pr-8 rounded-r-3xl">
-                {chapter.quote}
-              </blockquote>
-              <div className="font-light leading-relaxed whitespace-pre-wrap text-xl space-y-8 text-basecamp-stone">
-                {chapter.content.split('\n\n').map((para, i) => {
-                  if (para.startsWith('### ')) return <h3 key={i} className="text-3xl font-serif mt-16 mb-8 text-basecamp-stone font-bold">{para.replace('### ', '')}</h3>;
-                  return <p key={i} className="mb-8">{para}</p>;
-                })}
+          <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0 }} className="pt-32 pb-20 px-6 max-w-4xl mx-auto min-h-screen text-basecamp-stone text-left">
+            <button onClick={onBack} className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-basecamp-accent mb-12 group outline-none"><ArrowLeft className="w-4 h-4 transition-transform group-hover:-translate-x-1" /> Back to Guide</button>
+            <div className="prose prose-lg max-w-none text-basecamp-stone text-left">
+              <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-basecamp-accent mb-4 block text-left">Chapter 0{chapter.id}</span>
+              <h1 className="text-5xl md:text-8xl font-serif mb-10 leading-tight tracking-tighter text-left">{chapter.title}</h1>
+              <blockquote className="text-2xl italic border-l-4 border-basecamp-accent pl-10 py-4 mb-16 text-basecamp-earth leading-snug font-serif bg-basecamp-sky/20 pr-8 rounded-r-3xl text-left">{chapter.quote}</blockquote>
+              <div className="font-light leading-relaxed whitespace-pre-wrap text-xl space-y-8 text-left">
+                {chapter.content.split('\n\n').map((para, i) => para.startsWith('### ') ? <h3 key={i} className="text-3xl font-serif mt-16 mb-8 text-basecamp-stone font-bold">{para.replace('### ', '')}</h3> : <p key={i} className="mb-8">{para}</p>)}
               </div>
             </div>
-            <div className="mt-32 pt-20 border-t border-black/5 flex flex-col items-center gap-10">
-               <div className="w-20 h-[1px] bg-basecamp-accent" />
-               <button onClick={onBack} className="px-12 py-5 bg-basecamp-stone text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-xl hover:bg-basecamp-accent transition-all">Back to Guide</button>
-            </div>
+            <button onClick={onBack} className="mt-20 px-12 py-5 bg-basecamp-stone text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-xl hover:bg-basecamp-accent transition-all mx-auto block outline-none">Continue Journey</button>
           </motion.div>
+        );
+      }
+
+      function CommunityRedditStyle() {
+        return (
+          <section id="community" className="py-32 px-8 bg-white no-print">
+            <div className="max-w-6xl mx-auto">
+               <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8 text-left">
+                  <div className="max-w-2xl text-left">
+                    <span className="text-basecamp-accent font-bold text-[10px] uppercase tracking-[0.4em] block mb-4">The Base Camp Summit</span>
+                    <h2 className="text-6xl md:text-7xl font-serif text-basecamp-stone leading-none tracking-tighter">Community <span className="italic font-light text-basecamp-forest">Threads</span></h2>
+                  </div>
+               </div>
+
+               <div className="bg-basecamp-sky/20 rounded-[3rem] p-10 md:p-16 border border-black/5 flex flex-col min-h-[400px] text-left relative overflow-hidden max-w-4xl mx-auto">
+                  <div className="flex flex-col h-full justify-between">
+                    <div>
+                      <div className="flex items-center gap-4 mb-8 text-left">
+                         <div className="w-14 h-14 rounded-2xl bg-basecamp-accent flex items-center justify-center text-white text-xl font-bold shadow-md border-2 border-white">B</div>
+                         <div>
+                            <h3 className="text-base font-bold text-basecamp-stone uppercase tracking-widest">Base Camper</h3>
+                            <p className="text-[10px] opacity-40 uppercase tracking-widest">Today • Starting the climb</p>
+                         </div>
+                      </div>
+                      
+                      <h2 className="text-4xl md:text-5xl font-serif text-basecamp-stone mb-8 leading-tight text-left">Establish Your First Base Camp Reflection</h2>
+                      <p className="text-xl font-light text-basecamp-earth whitespace-pre-wrap leading-relaxed mb-12 text-left">Welcome to the Base Camp forum. This is a dedicated space for parents navigating the transition beyond the empty nest. Start a conversation or share a reflection below.</p>
+                      
+                      <div className="pt-12 border-t border-black/10 text-left">
+                         <h4 className="text-[10px] font-bold uppercase tracking-widest text-basecamp-forest mb-8">Responses From The Trail</h4>
+                         <p className="text-sm italic opacity-40 font-light mb-8">No responses to this reflection yet. Be the first to share your wisdom.</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 bg-white rounded-3xl p-8 border border-black/5 shadow-sm text-left">
+                       <p className="text-xs font-bold text-basecamp-stone mb-4 opacity-40 uppercase">Post your own reflection</p>
+                       <textarea className="w-full bg-basecamp-sky/30 rounded-2xl p-6 text-sm outline-none focus:ring-2 ring-basecamp-forest/20 resize-none min-h-[120px] text-basecamp-stone" placeholder="Share your experience with the community..."></textarea>
+                       <div className="flex justify-end mt-4">
+                          <button className="px-10 py-4 bg-basecamp-stone text-white rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-basecamp-forest transition-all shadow-lg active:scale-95 outline-none font-sans">Publish Reflection</button>
+                       </div>
+                    </div>
+                  </div>
+               </div>
+            </div>
+          </section>
         );
       }
 
       function MetaphorSection() {
         return (
-          <section id="metaphor" className="py-40 px-8 bg-white overflow-hidden">
+          <section id="metaphor" className="py-40 px-8 bg-white overflow-hidden text-left">
             <div className="max-w-6xl mx-auto grid lg:grid-cols-[1fr_1.2fr] gap-24 items-center">
-              <div className="space-y-12">
+              <div className="space-y-12 text-basecamp-stone text-left">
                 <div className="w-24 h-2 bg-basecamp-accent rounded-full" />
-                <h2 className="text-6xl md:text-7xl leading-[0.95] tracking-tight font-serif text-basecamp-stone">You are the <span className="italic font-light">Base Camp</span>. <br /> They are the <span className="italic font-light">Climbers</span>.</h2>
-                <p className="text-basecamp-earth leading-relaxed text-xl font-light">The phrase “empty nest” has become shorthand for transition. But what if the emptiness isn’t an ending? What if it’s an opening?</p>
-                <div className="grid grid-cols-2 gap-10">
-                   <div className="space-y-4 p-8 bg-basecamp-sky/20 rounded-[2.5rem] border border-black/5">
-                      <Flame className="w-8 h-8 text-basecamp-accent" />
-                      <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-basecamp-stone">Reliability</h4>
-                      <p className="text-sm opacity-60 font-light">A safe haven when the high-altitude weather turns harsh.</p>
+                <h2 className="text-6xl md:text-7xl leading-[0.95] tracking-tight font-serif text-left">You are the <span className="italic font-light text-left">Base Camp</span>. <br /> They are the <span className="italic font-light text-left">Climbers</span>.</h2>
+                <p className="text-basecamp-earth leading-relaxed text-xl font-light text-left">The phrase “empty nest” has become shorthand for transition. But what if the emptiness isn’t an ending? What if it’s an opening?</p>
+                <div className="grid grid-cols-2 gap-10 text-left">
+                   <div className="space-y-4 p-8 bg-basecamp-sky/20 rounded-[2.5rem] border border-black/5 text-left">
+                      <Flame className="w-8 h-8 text-basecamp-accent mx-0" />
+                      <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-left">Reliability</h4>
+                      <p className="text-sm opacity-60 font-light text-left">A safe haven when the weather turns harsh.</p>
                    </div>
-                   <div className="space-y-4 p-8 bg-basecamp-sky/20 rounded-[2.5rem] border border-black/5">
-                      <Compass className="w-8 h-8 text-basecamp-accent" />
-                      <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-basecamp-stone">Wisdom</h4>
-                      <p className="text-sm opacity-60 font-light">Providing the long-view perspective from having walked the floor.</p>
+                   <div className="space-y-4 p-8 bg-basecamp-sky/20 rounded-[2.5rem] border border-black/5 text-left">
+                      <Compass className="w-8 h-8 text-basecamp-accent mx-0" />
+                      <h4 className="font-bold text-xs uppercase tracking-[0.2em] text-left">Wisdom</h4>
+                      <p className="text-sm opacity-60 font-light text-left">Perspective from having walked the floor.</p>
                    </div>
                 </div>
               </div>
               <div className="relative">
-                <div className="relative aspect-[4/5] rounded-[3rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(0,0,0,0.3)] bg-gray-100 group">
-                  <img src="https://scontent-den2-1.xx.fbcdn.net/v/t39.30808-6/505441402_10232767610029828_7191845792755838213_n.jpg?stp=cp6_dst-jpg_tt6&ccb=1-7&oe=69C15C45" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000 scale-105 group-hover:scale-100" alt="Base camp metaphor" referrerPolicy="no-referrer" />
-                  <div className="absolute inset-0 bg-basecamp-stone/10 mix-blend-multiply opacity-60" />
-                </div>
-                <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} className="absolute -bottom-12 -left-12 p-12 bg-white/90 backdrop-blur-2xl rounded-[3rem] shadow-2xl border border-white/40 max-w-sm">
-                  <p className="text-2xl italic font-serif leading-relaxed text-basecamp-stone">"I lift up my eyes to the mountains—where does my help come from?"</p>
-                  <p className="mt-8 text-[10px] uppercase font-bold tracking-[0.4em] text-basecamp-accent">— Psalm 121:1-2</p>
-                </motion.div>
+                <img 
+                  src={METAPHOR_PHOTO} 
+                  className="rounded-[3rem] shadow-2xl grayscale-0 transition-all duration-1000" 
+                  alt="Base camp metaphor" 
+                  referrerPolicy="no-referrer" 
+                />
+                <motion.div initial={{ y: 50, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} viewport={{ once: true }} className="absolute -bottom-12 -left-12 p-12 bg-white/90 backdrop-blur-2xl rounded-[3rem] shadow-2xl border border-white/40 max-w-sm text-left"><p className="text-2xl italic font-serif leading-relaxed text-basecamp-stone text-left">"I lift up my eyes to the mountains—where does my help come from?"</p><p className="mt-8 text-[10px] uppercase font-bold text-basecamp-accent tracking-widest text-left">— Psalm 121:1-2</p></motion.div>
               </div>
             </div>
           </section>
@@ -622,30 +597,10 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
 
       function QuoteSection() {
         return (
-          <section className="py-48 bg-basecamp-stone text-basecamp-sky text-center px-8 relative overflow-hidden">
-            <motion.div initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} className="absolute -bottom-20 -left-20 w-96 h-96 opacity-[0.03] pointer-events-none">
-              <Mountain className="w-full h-full rotate-12" />
-            </motion.div>
+          <section className="py-48 bg-basecamp-stone text-basecamp-sky text-center px-8 relative overflow-hidden no-print">
             <h2 className="text-5xl md:text-7xl font-serif italic max-w-5xl mx-auto leading-[1.1] relative z-10 drop-shadow-xl">"The empty nest isn't a void to be filled, but a base camp to be built."</h2>
             <div className="w-24 h-1.5 bg-basecamp-accent mx-auto mt-16 mb-6 relative z-10 rounded-full" />
-            <p className="text-[10px] font-bold uppercase tracking-[0.6em] opacity-40 relative z-10">The Core Philosophy</p>
-          </section>
-        );
-      }
-
-      function CommunitySection() {
-        return (
-          <section id="community" className="py-40 bg-[#E8EDF3] text-center no-print">
-            <div className="max-w-4xl mx-auto space-y-12 px-8">
-              <div className="w-20 h-20 bg-white rounded-3xl shadow-xl flex items-center justify-center mx-auto mb-10 border border-black/5 rotate-3">
-                 <MessageSquare className="w-10 h-10 text-basecamp-accent" />
-              </div>
-              <h2 className="text-6xl md:text-8xl font-serif text-basecamp-stone tracking-tighter">Community <span className="italic font-light opacity-50">Summit</span></h2>
-              <p className="text-2xl font-light text-basecamp-earth max-w-3xl mx-auto leading-relaxed">Share reflections, ask for guidance, and connect with other base campers. We're building the forum for our 2026 launch.</p>
-              <div className="pt-8">
-                 <button className="px-12 py-6 bg-basecamp-stone text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-basecamp-accent transition-all shadow-2xl hover:scale-105 active:scale-95">Join the Waiting List</button>
-              </div>
-            </div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.6em] opacity-40 relative z-10 font-sans">The Core Philosophy</p>
           </section>
         );
       }
@@ -653,24 +608,20 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
       function AuthorSection() {
         return (
           <section id="author" className="py-40 px-8 bg-white no-print">
-            <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-24">
+            <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-24 text-left">
               <div className="relative group">
-                <div className="w-72 h-72 md:w-96 md:h-96 rounded-[4rem] overflow-hidden shadow-[0_60px_100px_-20px_rgba(0,0,0,0.3)] bg-gray-200">
-                   <img src="https://scontent-den2-1.xx.fbcdn.net/v/t39.30808-6/585056595_10235399949716675_8801284874818327176_n.jpg?stp=cp6_dst-jpg_tt6&ccb=1-7&oe=69C160B4" className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-1000" alt="Justin Schmitt" referrerPolicy="no-referrer" />
-                </div>
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-basecamp-accent/10 rounded-full blur-[80px] -z-10" />
-                <div className="absolute -top-10 -left-10 w-40 h-40 bg-basecamp-stone/5 rounded-full blur-[80px] -z-10" />
+                <img src={JUSTIN_PHOTO} className="w-72 h-72 md:w-96 md:h-96 rounded-[4rem] object-cover shadow-2xl transition-all duration-1000" alt="Justin Schmitt" referrerPolicy="no-referrer" />
               </div>
-              <div className="flex-1 space-y-10">
-                <div className="flex items-center gap-4">
+              <div className="flex-1 space-y-10 text-basecamp-stone text-left">
+                <div className="flex items-center gap-4 text-left">
                    <div className="w-12 h-0.5 bg-basecamp-accent" />
-                   <span className="text-basecamp-accent font-bold text-[10px] tracking-[0.5em] uppercase">The Author</span>
+                   <span className="text-basecamp-accent font-bold text-[10px] tracking-[0.5em] uppercase text-left font-sans">The Author</span>
                 </div>
-                <h2 className="text-6xl md:text-7xl font-serif text-basecamp-stone tracking-tighter">Justin Schmitt</h2>
-                <p className="text-basecamp-earth font-light leading-relaxed text-2xl">Justin Schmitt believes life’s most meaningful seasons aren’t always the busiest ones. A Christian, husband, father, and ski instructor, he spent decades in leadership before returning home to Durango, Colorado.</p>
-                <div className="flex gap-12 pt-6">
-                   <a href="#" className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] hover:text-basecamp-accent transition-colors group"><Star className="w-5 h-5 text-basecamp-accent group-hover:rotate-45 transition-transform" /> Newsletter</a>
-                   <a href="#" className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] hover:text-basecamp-accent transition-colors group"><Heart className="w-5 h-5 text-basecamp-accent group-hover:scale-125 transition-transform" /> Connect</a>
+                <h2 className="text-6xl md:text-7xl font-serif tracking-tighter text-left">Justin Schmitt</h2>
+                <p className="text-basecamp-earth font-light leading-relaxed text-2xl text-left">A Christian, husband, father, and ski instructor, he spent decades in leadership before returning home to Durango, Colorado to write and serve.</p>
+                <div className="flex gap-12 pt-6 text-left">
+                   <a href="#" className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] hover:text-basecamp-accent transition-colors group text-left font-sans"><Star className="w-5 h-5 text-basecamp-accent group-hover:rotate-45 transition-transform" /> Newsletter</a>
+                   <a href="#" className="flex items-center gap-3 text-xs font-bold uppercase tracking-[0.2em] hover:text-basecamp-accent transition-colors group text-left font-sans"><Heart className="w-5 h-5 text-basecamp-accent group-hover:scale-125 transition-transform" /> Connect</a>
                 </div>
               </div>
             </div>
@@ -680,15 +631,15 @@ For me, the mountains of Durango, Colorado, have always held a sacred place in m
 
       function Footer() {
         return (
-          <footer className="py-24 px-8 bg-basecamp-sky border-t border-black/5 text-center no-print">
+          <footer className="py-24 px-8 bg-basecamp-sky border-t border-black/5 text-center no-print text-basecamp-stone">
             <div className="max-w-4xl mx-auto space-y-8">
                <Mountain className="w-12 h-12 text-basecamp-accent mx-auto mb-10 opacity-60" />
-               <div className="flex justify-center gap-12 text-[10px] font-bold uppercase tracking-[0.4em] opacity-40">
+               <div className="flex justify-center gap-12 text-[10px] font-bold uppercase tracking-[0.4em] opacity-40 font-sans">
                   <a href="#" className="hover:text-basecamp-accent">Privacy Policy</a>
                   <a href="#" className="hover:text-basecamp-accent">Terms of Service</a>
                   <a href="#" className="hover:text-basecamp-accent">Media Kit</a>
                </div>
-               <p className="text-[10px] font-bold uppercase tracking-[0.5em] opacity-25">© 2026 Justin Schmitt — Durango, Colorado</p>
+               <p className="text-[10px] font-bold uppercase tracking-[0.5em] opacity-25 font-sans">© 2026 Justin Schmitt — Durango, Colorado</p>
             </div>
           </footer>
         );
